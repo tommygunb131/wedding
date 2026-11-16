@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2a78d6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="חתונה">
+<title>חתונה — מודל כלכלי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f6f5f2;--surface:#fcfcfb;--surface2:#f0efec;--line:#e2e0da;
+  --text:#0b0b0b;--text2:#52514e;--muted:#8a8984;
+  --pos:#2a78d6;--pos-soft:#cde2fb;--neg:#e34948;--neg-soft:#f8d5d4;
+  --accent:#2a78d6;--warn:#b77a00;--good:#0ca30c;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;
+}
+@media (prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])){
+  color-scheme:dark;
+  --bg:#121211;--surface:#1a1a19;--surface2:#252523;--line:#33332f;
+  --text:#f0efec;--text2:#c3c2b7;--muted:#8f8e86;
+  --pos:#3987e5;--pos-soft:#1c3a5e;--neg:#e66767;--neg-soft:#4a2526;
+  --accent:#3987e5;--warn:#e0a52a;--good:#3cc13c;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;}
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Heebo,system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.45}
+.num,.n{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;display:inline-block}
+header{padding:16px 16px 0;max-width:1180px;margin:0 auto}
+h1{font-size:22px;margin:0 0 2px}
+.sub{color:var(--text2);font-size:13px}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+button,.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+nav{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);margin-top:10px}
+nav .in{max-width:1180px;margin:0 auto;display:flex;gap:2px;overflow-x:auto;padding:0 10px}
+nav a{padding:10px 12px;color:var(--text2);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;font-size:14px}
+nav a.on{color:var(--text);border-color:var(--accent);font-weight:500}
+main{max-width:1180px;margin:0 auto;padding:14px 12px 60px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi .l{font-size:12px;color:var(--text2)}
+.kpi .v{font-size:22px;font-weight:700;margin-top:2px}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h2{font-size:16px;margin:0 0 4px}
+.card .hint{font-size:13px;color:var(--text2);margin:0 0 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.row{display:grid;grid-template-columns:minmax(120px,1.3fr) 2fr 80px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:0}
+.row label{font-size:14px}
+.row .val{text-align:left;font-weight:500}
+.row small{display:block;color:var(--muted);font-size:11.5px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=number],input[type=text],select,textarea{font:inherit;font-size:14px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+input[type=number]{width:96px;direction:ltr}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+th{font-weight:500;color:var(--text2);font-size:12.5px;background:var(--surface2);position:sticky;top:0;cursor:default}
+th.sort{cursor:pointer}
+td.r,th.r{text-align:left}
+.tw{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:8px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.pill{display:inline-block;font-size:11.5px;padding:1px 7px;border-radius:99px;background:var(--surface2);color:var(--text2)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;gap:5px;align-items:center;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:13px;background:var(--surface);cursor:pointer;user-select:none}
+.chip input{margin:0}
+.callout{border-inline-start:3px solid var(--accent);background:var(--surface2);padding:9px 12px;border-radius:6px;font-size:14px;margin:8px 0}
+.callout.warn{border-color:var(--warn)}
+.callout.bad{border-color:var(--neg)}
+.bars .b{display:grid;grid-template-columns:minmax(150px,210px) 1fr 90px;gap:8px;align-items:center;margin:5px 0;font-size:13.5px}
+.bars .track{height:14px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.bars .fill{height:100%;border-radius:0 4px 4px 0;background:var(--pos)}
+.bars .fill.c{background:var(--neg)}
+svg text{fill:var(--text2);font-family:Heebo,sans-serif;font-size:11px}
+svg .ax{stroke:var(--line)}
+.tip{position:fixed;pointer-events:none;background:var(--text);color:var(--surface);font-size:12.5px;padding:6px 9px;border-radius:6px;z-index:50;display:none;max-width:260px;line-height:1.35}
+.tab{display:none}.tab.on{display:block}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--text2);margin-top:4px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-inline-end:4px;vertical-align:-1px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal.on{display:flex}
+.modal .box{background:var(--surface);border-radius:12px;padding:16px;max-width:720px;width:100%;max-height:90vh;overflow:auto}
+.modal textarea{width:100%;height:280px;direction:ltr;font-family:ui-monospace,monospace;font-size:12px}
+.mini{font-size:12px;color:var(--muted)}
+.heat td{text-align:center}
+.heat td.h{font-weight:500}
+details summary{cursor:pointer;color:var(--text2);font-size:13.5px}
+.model p,.model li{font-size:14.5px}
+.model code{background:var(--surface2);padding:1px 5px;border-radius:4px;direction:ltr;unicode-bidi:isolate;display:inline-block}
+.seg-tag{font-size:12px}
+.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.right{margin-inline-start:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>חתונה — מודל כלכלי</h1>
+  <div class="sub">שישי בצהריים · ספט׳–אוק׳ 2027 · חיפה–חדרה · כל המספרים ניתנים לשינוי, והכול מחושב מחדש מיד</div>
+  <div class="toolbar">
+    <button id="bExport">ייצוא / גיבוי</button>
+    <button id="bImport">ייבוא</button>
+    <button id="bCsv">העתק רשימת מוזמנים (CSV)</button>
+    <button id="bReset">איפוס הנחות המודל</button><button id="bLogout" style="display:none">יציאה</button>
+    <span class="mini" id="saveState" style="align-self:center"></span>
+  </div>
+</header>
+<nav><div class="in" id="nav">
+  <a href="#overview">סקירה</a><a href="#guests">מוזמנים</a><a href="#attendance">מודל הגעה</a><a href="#gifts">מתנות</a><a href="#costs">עלויות</a><a href="#scenarios">תרחישים</a><a href="#model">מדריך והסבר</a>
+</div></nav>
+<main>
+  <div class="kpis" id="kpis"></div>
+
+  <!-- OVERVIEW -->
+  <section class="tab" id="t-overview">
+    <div class="card" id="diffCard" style="display:none"></div>
+    <div class="card">
+      <h2>התפלגות התוצאה הכספית</h2>
+      <p class="hint">כל עמודה היא טווח של רווח/הפסד. הגובה מראה בכמה מתוך <span id="nRuns"></span> סימולציות של החתונה יצאה התוצאה הזאת. התוצאה כבר כוללת את החיסכון. אדום = חסר כסף, כחול = נשאר כסף. הקו המקווקו הוא 0.</p>
+      <div id="histNet"></div>
+      <div class="legend"><span><i style="background:var(--neg)"></i>הפסד</span><span><i style="background:var(--pos)"></i>רווח</span><span>│ P10 / חציון / P90</span></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>כל ההוצאות וההכנסות (מ-0 עד השורה התחתונה)</h2><p class="hint">קוראים מלמעלה למטה. רוב הכסף יוצא <b>לפני</b> שמישהו מגיע. אחר כך המתנות והחיסכון מחזירים חלק ממנו.</p>
+        <div class="bars" id="costBars"></div>
+      </div>
+      <div class="card">
+        <h2>כמה מבוגרים יגיעו?</h2>
+        <p class="hint">התפלגות מספר המבוגרים. משמאל לקו המינימום משלמים על מנות ריקות.</p>
+        <div id="histAdults"></div>
+      </div>
+    </div>
+    <div class="card" id="insights"></div>
+  </section>
+
+  <!-- GUESTS -->
+  <section class="tab" id="t-guests">
+    <div class="card">
+      <h2>מי בפנים?</h2>
+      <p class="hint">מסננים גלובליים: כל החישובים (סקירה, תרחישים) מתייחסים רק למה שמסומן כאן. נוח לבדוק "מה קורה בלי D".</p>
+      <div class="chips" id="fCircles"></div>
+      <div class="chips" id="fLocs" style="margin-top:6px"></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>לפי מעגל</h2><div id="pivC"></div></div>
+      <div class="card"><h2>לפי מיקום</h2><div id="pivL"></div></div>
+    </div>
+    <div class="card">
+      <div class="flex"><h2 style="margin:0">רשימת מוזמנים</h2>
+        <input type="text" id="gSearch" placeholder="חיפוש שם / קטגוריה" style="width:200px">
+        <span class="mini" id="gCount"></span>
+        <button class="right" id="bAdd">+ הוספת הזמנה</button></div>
+      <p class="hint" style="margin-top:6px">כל שורה היא <b>הזמנה</b> (משק בית). <b>מוזמנים</b> = כמה אנשים בהזמנה (כמו "סה״כ מוזמנים" בגיליון). כשיש בהזמנה 2, אפשר לסמן <b>"+1 לא בטוח"</b>, ואז השני נספר בהסתברות שבחרתם בלשונית מודל הגעה. "תרומה נטו" = מתנה צפויה פחות העלות השולית שהשורה מוסיפה. <b>ילד/ה</b> = המוזמן עצמו ילד/ה (נספר בחצי מנה, מתנה = "מתנה נוספת לכל ילד"). ההורים של תומר מסומנים "מתנה ידנית 0".</p>
+      <div class="tw"><table id="gTable"></table></div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section class="tab" id="t-attendance">
+    <div class="card">
+      <h2>הסתברות הגעה = בסיס לפי מעגל × מקדם מיקום</h2>
+      <p class="hint">מעגל אומר <b>כמה קרובים</b>, מיקום אומר <b>כמה קשה להגיע</b> (שישי בצהריים, נסיעה צפונה). בונוס הסעה מוסיף נקודות למי שבא מהמרכז אם יש אוטובוס.</p>
+      <div class="grid2">
+        <div id="attBase"></div>
+        <div id="attLoc"></div>
+      </div>
+      <div id="attOther" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <h2>מטריצת הסתברויות</h2>
+      <p class="hint">בכל תא: סיכוי הגעה, ומתחתיו כמות ההזמנות בתא.</p>
+      <div id="attMatrix"></div>
+    </div>
+  </section>
+
+  <!-- GIFTS -->
+  <section class="tab" id="t-gifts">
+    <div class="card">
+      <h2>מתנה ממוצעת לאדם, לפי קבוצה</h2>
+      <p class="hint">הסכום הוא לאדם בודד. זוג נותן <b>ראשון + מקדם × שני</b>, כי מעטפה זוגית בדרך כלל לא שווה פי 2. אפשר גם לקבוע מתנה ידנית לשורה מסוימת בטבלת המוזמנים.</p>
+      <div id="giftSeg"></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>פרמטרים</h2><div id="giftOther"></div></div>
+      <div class="card"><h2>מי "מכסה את המנה"?</h2><p class="hint">מתנה צפויה לאדם שמגיע, מול העלות השולית של מבוגר נוסף (<span id="mcNote"></span>).</p><div id="giftTable"></div></div>
+    </div>
+  </section>
+
+  <!-- COSTS -->
+  <section class="tab" id="t-costs">
+    <div class="card">
+      <h2>מקום האירוע</h2>
+      <div class="flex" style="margin-bottom:8px"><label>מקום:</label><select id="venueSel"></select></div>
+      <div id="venueBox"></div>
+    </div>
+    <div class="card">
+      <h2>הוצאות: ספקים ותוספות</h2>
+      <p class="hint">כל שורה: <b>☑ כלול</b> = נכנס לחישוב. <b>סגור / לא סגור</b>: על הוצאה סגורה (מחיר סופי) לא מוסיפים מרווח ביטחון. הסכום חופשי. בשורות עם רשימה אפשר לטעון מחיר מהגיליון (ביקורות mit4mit + התייקרות).</p>
+      <div id="supBox"></div>
+      <div id="upliftBox"></div>
+    </div>
+    <div class="card">
+        <h2>מרווח ביטחון</h2>
+        <p class="hint">אחוז שמוסיפים רק על הוצאות שעוד <b>לא סגורות</b>, כי מחיר שעוד לא סוכם נוטה לעלות. על הוצאות סגורות ועל המקום לא מוסיפים מרווח.</p>
+        <div id="contBox"></div>
+        <h2 style="margin-top:14px">מימון</h2>
+        <div id="fundBox"></div>
+    </div>
+  </section>
+
+  <!-- SCENARIOS -->
+  <section class="tab" id="t-scenarios">
+    <div class="card">
+      <h2>כמה שווה כל מעגל? (הוספה מצטברת)</h2>
+      <p class="hint">מתחילים מ-S בלבד ומוסיפים מעגל-מעגל. הנקודה היא התוצאה הצפויה, והקו הוא טווח 80% (P10–P90).</p>
+      <div id="cumChart"></div>
+      <div id="cumTable"></div>
+    </div>
+    <div class="card">
+      <h2>רגישות: מה הכי משפיע על השורה התחתונה?</h2>
+      <p class="hint">כל הנחה מוזזת לערך נמוך ולערך גבוה סביר, והשאר נשארות קבועות. ההנחות עם הפס הארוך ביותר הן מה שכדאי לברר קודם.</p>
+      <div id="tornado"></div>
+    </div>
+    <div class="card">
+      <h2>השוואת מקומות</h2>
+      <p class="hint">ההצעה שלכם מול המקומות בגיליון. במקומות מהגיליון המחיר הוא ממוצע מביקורות (+התייקרות), בלי מבנה מדרגות. זה הערכה, לא הצעת מחיר. אותם מוזמנים, ספקים ומתנות.</p>
+      <div class="tw" style="max-height:none"><table id="venueTable"></table></div>
+    </div>
+    <div class="card" id="breakeven"></div>
+  </section>
+
+  <!-- MODEL -->
+  <section class="tab model" id="t-model">
+    <div class="card">
+      <h2>איך עובדים עם האפליקציה (5 דקות)</h2>
+      <ol>
+        <li><b>עלויות:</b> מכניסים את ההצעה של המקום (התחייבות, מחיר, מחיר נוסף, רזרבה), את הספקים (סכום חופשי בכל שורה) ואת ההוצאות הנוספות. זה החלק ה"קשיח", ככל שיש בו יותר הצעות מחיר אמיתיות, ככה המודל מדויק יותר.</li>
+        <li><b>מוזמנים:</b> מוודאים שכל שורה נכונה: מעגל, מיקום, +1, ילדים. אפשר להוסיף ולמחוק הזמנות, ולסמן "מתנה ידנית" למי שאתם יודעים מה הוא ייתן.</li>
+        <li><b>מתנות:</b> סכום לאדם לכל קבוצה. זו ההנחה הכי רגישה במודל, אז כדאי לכוון אותה לפי מה שאתם נותנים ומה שחברים קיבלו.</li>
+        <li><b>מודל הגעה:</b> כמה סביר שכל מעגל יגיע ומכל מקום. אם אין לכם מושג, ברירות המחדל סבירות.</li>
+        <li><b>סקירה:</b> כאן רואים את השורה התחתונה. <b>תרחישים:</b> כאן משחקים, למשל מה שווה כל מעגל, מה משפיע הכי הרבה ואיך נראה מקום אחר.</li>
+      </ol>
+      <h2>איך לקרוא את המספרים</h2>
+      <ul>
+        <li><b>תוצאה צפויה (חציון):</b> כמה כסף תצאו בחוץ (או ברווח) בתרחיש האמצעי. חצי מהסימולציות טובות ממנו וחצי גרועות.</li>
+        <li><b>טווח 80%:</b> ב-8 מתוך 10 סימולציות התוצאה בתוך הטווח הזה. זו התשובה ל"כמה גרוע זה יכול להיות באופן סביר".</li>
+        <li><b>למה כל המעגלים "ברווח" אבל הסה״כ בהפסד?</b> כי "תרומה נטו" מודדת רק את מה שאורח <i>מוסיף</i> לעומת מצב שהוא לא מגיע. את ההתחייבות (מינימום × מחיר) ואת הספקים משלמים גם אם אף אחד לא מגיע. לכן ההפסד נוצר עוד לפני האורח הראשון, וכל אורח מקטין אותו קצת. הגרף "מאיפה מגיע ההפסד" בסקירה מראה את זה צעד אחרי צעד.</li>
+        <li><b>עלות לראש:</b> כל ההוצאות חלקי כל מי שמגיע, כולל ספקים. לכן היא גבוהה בהרבה ממחיר המנה.</li>
+        <li><b>הפסד בחתונה הוא לא באג:</b> המתנות צריכות לכסות גם את המנה וגם את חלקו של האורח בספקים (~₪300 לאורח). מתנה של ₪450 מכסה את המנה, אבל לא את שניהם.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>איך המודל עובד</h2>
+      <p>המודל מריץ את החתונה אלפי פעמים (סימולציית מונטה־קרלו). בכל ריצה:</p>
+      <ol>
+        <li><b>הגעה:</b> לכל הזמנה מגרילים אם היא מגיעה, בהסתברות <code>p = בסיס(מעגל) × מקדם(מיקום) + בונוס הסעה + ε</code>. ה-ε הוא "רעש מערכתי" אחד לכל הריצה. ככה מודלים יום שבו <i>כולם</i> מגיעים קצת פחות, למשל בגלל חום, פקקים או מלחמה, ולא רק רעש אקראי של כל אורח בנפרד.</li>
+        <li><b>+1:</b> אם יש אופציה, הבן/בת זוג מגיעים בהסתברות שבחרתם (ברירת מחדל 50%). +N קבוע מגיע עם בעל ההזמנה.</li>
+        <li><b>מתנה:</b> <code>תוחלת = סכום לאדם × (1 + מקדם בן/בת זוג × (מבוגרים−1)) + מתנה לילד × ילדים</code>. על התוחלת מוסיפים פיזור לוג־נורמלי (מקדם שונות ~25%, כי יש שנותנים יותר ויש שפחות), סיכוי קטן שאין מתנה כספית, ועוד מכפיל מערכתי לכל הריצה. המכפיל הזה הוא אי־הוודאות האמיתית: אולי <i>כל</i> ההערכות שלכם גבוהות ב-10%.</li>
+        <li><b>אולם:</b> <code>התחייבות × מחיר + max(0, מבוגרים − התחייבות) × מחיר נוסף + ילדים × מחיר × % ילדים</code>. ההתחייבות היא של מבוגרים בלבד. הרזרבה (10%) היא כמה מנות המקום מכין מעבר להתחייבות: מבוגרים בתוך הרזרבה עולים את המחיר הנוסף, והמודל מתריע אם יש סיכוי לעבור אותה.</li>
+        <li><b>קבועים:</b> כל ההוצאות המסומנות "כלול". על אלה שעוד לא סגורות מוסיפים מרווח ביטחון.</li>
+        <li><b>תוצאה:</b> <code>מתנות + כיסוי עלות (אוקראינה) + הורים − אולם − קבועים</code>. החיסכון מוצג בנפרד, כי הוא לא "רווח" אלא הכסף שמכסה את ההפסד.</li>
+      </ol>
+      <h2>עלות שולית מול עלות ממוצעת</h2>
+      <p>כשמחליטים אם להזמין או לקצץ מישהו, השאלה הנכונה היא כמה <b>עוד</b> עולה אורח נוסף. ספקים הם עלות קבועה, ומתחת למינימום גם המנה "בחינם", כי משלמים עליה בכל מקרה. לכן העלות השולית של מבוגר היא <code>מחיר מבוגר נוסף × הסיכוי להגיע למינימום</code>. "תרומה נטו" בטבלת המוזמנים מחושבת כך.</p>
+      <p>עלות ממוצעת (סה״כ חלקי ראשים) עונה על שאלה אחרת: מי "מממן" את האירוע. היא שימושית להשוואה בין מקומות, לא להחלטה על אורח בודד.</p>
+      <h2>מגבלות</h2>
+      <ul>
+        <li>הסכומים וההסתברויות הם הערכות שלכם ושלי, לא נתונים. המטרה היא להבין מה <i>רגיש</i>, ולכן כדאי להסתכל על לשונית הרגישות.</li>
+        <li>לא כולל עדיין: מתנות גדולות ממשפחה קרובה, טבעות, ירח דבש, ואת המע״מ אם לא כלול בהצעת המקום.</li>
+        <li>המחירים במקומות מהגיליון הם ממוצעי ביקורות, ולא מבנה מדרגות אמיתי.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<div class="tip" id="tip"></div>
+<div class="modal" id="modal"><div class="box">
+  <h2 id="mTitle" style="margin-top:0"></h2>
+  <p class="hint" id="mHint"></p>
+  <textarea id="mText"></textarea>
+  <div class="flex" style="margin-top:8px">
+    <button class="primary" id="mGo"></button>
+    <input type="file" id="mFile" accept=".json,.txt" style="display:none">
+    <button id="mFileBtn" style="display:none">טעינה מקובץ</button>
+    <button id="mClose" class="right">סגירה</button>
+    <span class="mini" id="mMsg"></span>
+  </div>
+</div></div>
+
+<script>
+const DATA = {"guests": [], "sup": {"dj": [{"tier": "Low", "name": "DJ Hadar Israel", "area": "Kiryat Motzkin", "note": "Most price data in the low tier; reviewers repeatedly call it under-priced", "price": 4650.0, "lo": 4000.0, "hi": 5500.0, "rating": 4.8, "conf": "Good"}, {"tier": "Low", "name": "Y Music", "area": "Yagur", "note": "Often bundled in HaHorsha venue packages", "price": 5000.0, "lo": 4500.0, "hi": 5500.0, "rating": 4.8, "conf": "Low – get quote"}, {"tier": "Low", "name": "Phill Kosinov", "area": "Haifa", "note": "", "price": 5500.0, "lo": 5500.0, "hi": 6500.0, "rating": 4.8, "conf": "Fair"}, {"tier": "Mid", "name": "Kangaroo DJs", "area": "Haifa", "note": "Large team, 440 reviews", "price": 6200.0, "lo": 5200.0, "hi": 8000.0, "rating": 4.8, "conf": "Good"}, {"tier": "Mid", "name": "DJ Pitzi (Shir)", "area": "Haifa area", "note": "", "price": 6500.0, "lo": 2000.0, "hi": 6800.0, "rating": 4.8, "conf": "Good"}, {"tier": "Mid", "name": "Events DJs", "area": "Haifa", "note": "", "price": 6500.0, "lo": 6000.0, "hi": 7000.0, "rating": 4.8, "conf": "Fair"}, {"tier": "Mid", "name": "DJ Eitan Carmi", "area": "Haifa", "note": "", "price": 7000.0, "lo": 6500.0, "hi": 7500.0, "rating": 4.8, "conf": "Fair"}, {"tier": "High", "name": "DJ Tal Duak", "area": "Haifa", "note": "", "price": 7500.0, "lo": 7000.0, "hi": 8300.0, "rating": 4.8, "conf": "Good"}, {"tier": "High", "name": "Zignmore DJs", "area": "Ramat Yishai", "note": "", "price": 7500.0, "lo": 7500.0, "hi": 10000.0, "rating": 4.85, "conf": "Fair"}, {"tier": "High", "name": "Paprika", "area": "Tel Aviv (works nationwide)", "note": "Highest-rated DJ team on the site (99/100, 2,500+ reviews)", "price": 9100.0, "lo": 7800.0, "hi": 10500.0, "rating": 4.95, "conf": "Good"}, {"tier": "High", "name": "Toxic | TOX1C", "area": "Kiryat Ata", "note": "Live reception show costs extra; only 1 price point", "price": 12000.0, "lo": 12000.0, "hi": 12000.0, "rating": 4.85, "conf": "Low – get quote"}], "photo": [{"tier": "Low", "name": "Koala Photographers", "area": "Kiryat Bialik", "note": "Stills + video + magnets; student-discount packages", "price": 8700.0, "lo": 6200.0, "hi": 10000.0, "rating": 4.8, "conf": "Good"}, {"tier": "Low", "name": "Terra Photography", "area": "Kiryat Bialik", "note": "Stills + video", "price": 8750.0, "lo": 7500.0, "hi": 10000.0, "rating": 4.75, "conf": "Fair"}, {"tier": "Low", "name": "Vanil Photographers", "area": "Haifa", "note": "Stills + video", "price": 9500.0, "lo": 9000.0, "hi": 9500.0, "rating": 4.75, "conf": "Fair"}, {"tier": "Low", "name": "Har Sheleg", "area": "Nesher", "note": "Stills + video", "price": 9750.0, "lo": 9000.0, "hi": 10000.0, "rating": 4.75, "conf": "Fair"}, {"tier": "Mid", "name": "Mabatim", "area": "Haifa", "note": "Stills + video", "price": 10400.0, "lo": 5500.0, "hi": 11800.0, "rating": 4.8, "conf": "Fair"}, {"tier": "Mid", "name": "Dori Aharon", "area": "Haifa", "note": "2 stills + 1 video + albums + clips", "price": 10650.0, "lo": 6800.0, "hi": 12500.0, "rating": 4.8, "conf": "Good"}, {"tier": "Mid", "name": "Katom Photographers", "area": "Haifa", "note": "Stills + video; magnets package available", "price": 11150.0, "lo": 8100.0, "hi": 12800.0, "rating": 4.8, "conf": "Good"}, {"tier": "High", "name": "Yossi Penso", "area": "Kiryat Motzkin", "note": "Stills + video; 1 price point", "price": 11350.0, "lo": 11350.0, "hi": 11350.0, "rating": 4.8, "conf": "Low – get quote"}, {"tier": "High", "name": "S.O.D Photographers", "area": "Ra'anana (serves north)", "note": "Stills + video + albums", "price": 11500.0, "lo": 10440.0, "hi": 12200.0, "rating": 4.8, "conf": "Fair"}, {"tier": "High", "name": "Glusha Photographers", "area": "Haifa", "note": "Top-rated in Haifa (98/100, 742 reviews); includes albums", "price": 11950.0, "lo": 7900.0, "hi": 13500.0, "rating": 4.9, "conf": "Good"}, {"tier": "High", "name": "Micha Brickman", "area": "Haifa", "note": "Stills + video; 1 price point", "price": 14500.0, "lo": 14500.0, "hi": 14500.0, "rating": 4.75, "conf": "Low – get quote"}, {"tier": "Stills-only / lean", "name": "Matan Elihai", "area": "Or Akiva", "note": "Lean option; verify what's included", "price": 4000.0, "lo": 2000.0, "hi": 6000.0, "rating": 4.75, "conf": "Low – get quote"}, {"tier": "Stills-only / lean", "name": "Nitzan Zohar", "area": "Zichron Ya'akov", "note": "Stills + video, no album", "price": 5250.0, "lo": 3500.0, "hi": 7000.0, "rating": 4.75, "conf": "Low – get quote"}, {"tier": "Stills-only / lean", "name": "Yael Shelah", "area": "Pardes Hanna", "note": "Stills; price includes a 2nd shooter", "price": 5600.0, "lo": 5200.0, "hi": 9500.0, "rating": 4.8, "conf": "Fair"}, {"tier": "Stills-only / lean", "name": "Oren Songo", "area": "Kiryat Bialik", "note": "Two stills shooters, no albums", "price": 6750.0, "lo": 6500.0, "hi": 8500.0, "rating": 4.75, "conf": "Fair"}], "makeup": [{"tier": "Low", "name": "Einav Levi", "area": "Harish", "note": "Makeup + hair; some prices include trial", "price": 1875.0, "lo": 600.0, "hi": 3500.0, "rating": 4.75, "conf": "Good"}, {"tier": "Low", "name": "Rotem Raz Schneider", "area": "Kiryat Tivon", "note": "Makeup + hair, incl. extensions", "price": 2000.0, "lo": 1750.0, "hi": 2000.0, "rating": 4.75, "conf": "Fair"}, {"tier": "Low", "name": "Yael Shefer", "area": "Beit Oren", "note": "Includes accompaniment until the chuppah", "price": 2250.0, "lo": 2200.0, "hi": 3800.0, "rating": 4.75, "conf": "Good"}, {"tier": "Mid", "name": "Lilach Nachmani", "area": "Jezreel Valley", "note": "Makeup + hair", "price": 2600.0, "lo": 1700.0, "hi": 3500.0, "rating": 4.8, "conf": "Good"}, {"tier": "Mid", "name": "Naama Rivlin", "area": "Haifa", "note": "Makeup + hair; trial + long accompaniment options", "price": 2800.0, "lo": 1700.0, "hi": 4400.0, "rating": 4.8, "conf": "Good"}, {"tier": "Mid", "name": "Or Asayag", "area": "Haifa", "note": "Makeup + hair; partial/full accompaniment", "price": 3050.0, "lo": 2500.0, "hi": 4500.0, "rating": 4.8, "conf": "Good"}, {"tier": "High", "name": "Nirit Kornberg", "area": "Haifa", "note": "Makeup + hair + short accompaniment", "price": 3750.0, "lo": 2850.0, "hi": 4100.0, "rating": 4.8, "conf": "Fair"}, {"tier": "High", "name": "Yarden Biton", "area": "Kiryat Motzkin", "note": "Makeup + hair + accompaniment", "price": 3925.0, "lo": 3000.0, "hi": 4000.0, "rating": 4.8, "conf": "Good"}, {"tier": "High", "name": "Noa Atias", "area": "Kiryat Bialik", "note": "Some prices include mother's makeup", "price": 4000.0, "lo": 3000.0, "hi": 5500.0, "rating": 4.75, "conf": "Good"}], "dress": [{"tier": "Low", "name": "Alexa Bridal", "area": "Hadera", "note": "PURCHASE / custom-sewn; dress is yours", "price": 3800.0, "lo": 3000.0, "hi": 4900.0, "rating": 4.75, "conf": "Good"}, {"tier": "Low", "name": "Mika Bridal", "area": "Tel Aviv", "note": "RENTAL; often 2 dresses + veil", "price": 4240.0, "lo": 3990.0, "hi": 8500.0, "rating": 4.65, "conf": "Good"}, {"tier": "Low", "name": "White Dress", "area": "Haifa area", "note": "RENTAL; 'sane prices'", "price": 4700.0, "lo": 3300.0, "hi": 6000.0, "rating": 4.75, "conf": "Fair"}, {"tier": "Mid", "name": "Anat Pesahov", "area": "Haifa", "note": "2 dresses incl. alterations", "price": 6000.0, "lo": 1000.0, "hi": 8500.0, "rating": 4.8, "conf": "Fair"}, {"tier": "Mid", "name": "Natella", "area": "Haifa (Neve Sha'anan)", "note": "RENTAL; some prices cover 2 dresses", "price": 8000.0, "lo": 6000.0, "hi": 14000.0, "rating": 4.85, "conf": "Good"}, {"tier": "High", "name": "Flora", "area": "Haifa", "note": "Rental and custom options", "price": 11000.0, "lo": 9000.0, "hi": 16500.0, "rating": 4.8, "conf": "Good"}, {"tier": "High", "name": "Arava Polak", "area": "Haifa", "note": "CUSTOM-MADE from scratch", "price": 11750.0, "lo": 8500.0, "hi": 19500.0, "rating": 4.85, "conf": "Good"}], "design": [{"tier": "Low", "name": "Shoval Productions", "area": "Haifa", "note": "Event design", "price": 3000.0, "lo": 1400.0, "hi": 7800.0, "rating": 4.75, "conf": "Fair"}, {"tier": "Low", "name": "Noy Levi Design", "area": "Haifa", "note": "Bouquet, chuppah, entrance sign, car", "price": 4465.0, "lo": 1430.0, "hi": 7500.0, "rating": 4.75, "conf": "Low – get quote"}, {"tier": "Mid", "name": "Hilula Design & Florals", "area": "Alonim", "note": "Design + flowers", "price": 5750.0, "lo": 4500.0, "hi": 7000.0, "rating": 4.75, "conf": "Low – get quote"}, {"tier": "Mid", "name": "Hilalu Flowers", "area": "Haifa", "note": "Incl. bridal bouquet; flexible on budget", "price": 5750.0, "lo": 1200.0, "hi": 6500.0, "rating": 4.75, "conf": "Fair"}, {"tier": "Mid", "name": "Nora", "area": "Yagur", "note": "Chuppah + bouquet", "price": 5850.0, "lo": 2500.0, "hi": 9000.0, "rating": 4.65, "conf": "Fair"}, {"tier": "Mid", "name": "Nina (Shahar Abel)", "area": "Pardes Hanna", "note": "Florals; price incl. VAT", "price": 6000.0, "lo": 2000.0, "hi": 16461.0, "rating": 4.8, "conf": "Good"}, {"tier": "High", "name": "Palpelet", "area": "Haifa", "note": "Design + day-of coordination; some quotes are production only", "price": 8000.0, "lo": 5800.0, "hi": 23000.0, "rating": 4.8, "conf": "Good"}, {"tier": "High", "name": "Shoshan Tzachor", "area": "Pardes Hanna", "note": "Full event design", "price": 8700.0, "lo": 2000.0, "hi": 12000.0, "rating": 4.75, "conf": "Fair"}]}, "venues": [{"tier": "Low", "name": "Castello | קסטלו", "area": "Atlit", "type": "AC hall, sea view", "min": 150.0, "max": 450.0, "price": 240.0, "av": 3000.0, "food": 4.0, "sound": 2.5, "dance": 3.0, "score": 3.96, "note": "Air-conditioned hall, which avoids Friday-noon heat. A Google reviewer praised a Friday lunchtime wedding here; another complained it was very loud with slow service. Thin price data."}, {"tier": "Low", "name": "Galeria 279 | גלריה 279", "area": "Haifa (Histadrut Ave)", "type": "Boutique indoor hall", "min": 100.0, "max": 300.0, "price": 250.0, "av": 3000.0, "food": 4.0, "sound": 3.0, "dance": 3.0, "score": 4.08, "note": "Intimate hall; per-head price falls as headcount rises. Google: tasty but 'not special' food. Only 1 recent price point, so get a quote."}, {"tier": "Low", "name": "Yama | ימה", "area": "Hof HaCarmel, Haifa", "type": "Hall + sea deck", "min": 100.0, "max": 550.0, "price": 270.0, "av": 2000.0, "food": 3.5, "sound": 3.0, "dance": 3.0, "score": 3.89, "note": "Strongest value in Haifa with lots of price data. The owner is repeatedly praised for flexibility. One couple reports per-head price dropping above 100 guests, and alcohol is often included. Google: several guests call t"}, {"tier": "Low", "name": "Bikta BaYaar | בקתה ביער", "area": "Beit Oren (Carmel)", "type": "Forest garden + separate dance hall", "min": 150.0, "max": 0, "price": 280.0, "av": 3000.0, "food": 3.5, "sound": 3.0, "dance": 4.0, "score": 4.01, "note": "Dining and party are in separate spaces, so older guests can escape the noise. One couple had AV/video trouble. Google is mixed on main courses. A 170-portion minimum was reported."}, {"tier": "Low", "name": "Bistro de Carmel | ביסטרו דה כרמל", "area": "Zichron Ya'akov", "type": "Small-event venue", "min": 50.0, "max": 250.0, "price": 280.0, "av": 0.0, "food": 5.0, "sound": 3.0, "dance": 4.0, "score": 4.4, "note": "Built for small weddings (reviews: 100–230 guests). All-in packages can include DJ and vendors, so check before booking separate ones. Highest Google rating in the set. Thin price data (230–400)."}, {"tier": "Low", "name": "HaHorsha | החורשה", "area": "Yagur", "type": "Garden", "min": 100.0, "max": 0, "price": 290.0, "av": 4500.0, "food": 4.5, "sound": 4.5, "dance": 5.0, "score": 4.57, "note": "Best match for 'sound + dancing': several reviews describe an acoustically built dance floor that is loud on the floor but quieter at the tables. AV not included. Outdoor, so September heat matters. Only 2 price points. "}, {"tier": "Low", "name": "Garden Hotel | גארדן הוטל", "area": "Haifa (downtown)", "type": "Garden + hall", "min": 100.0, "max": 600.0, "price": 295.0, "av": 3000.0, "food": 4.5, "sound": 3.0, "dance": 3.0, "score": 4.03, "note": "Very consistent pricing (270–335). Premium bar roughly +₪22/guest. Its Google score is dragged down by hotel-room reviews, not events."}, {"tier": "Low", "name": "Caesarea Winery Garden | יקבי קיסריה", "area": "Caesarea", "type": "Garden at winery", "min": 100.0, "max": 350.0, "price": 300.0, "av": 4000.0, "food": 4.5, "sound": 3.0, "dance": 3.0, "score": 4.03, "note": "The chef is praised heavily. Google calls it ideal for small-to-medium weddings, though one guest mentions AC problems. Lighting, AV and security usually extra."}, {"tier": "Low", "name": "Shmurata | שמורתה", "area": "Afek (NE of Haifa)", "type": "Nature garden", "min": 150.0, "max": 0, "price": 300.0, "av": 4500.0, "food": 4.5, "sound": 3.0, "dance": 3.5, "score": 4.06, "note": "Slightly north of your range. Lots of price data; some couples got lower per-head prices above 180–200 guests. Kosher."}, {"tier": "Mid", "name": "Sharonit | שרונית", "area": "Mishmar HaSharon (S of Hadera)", "type": "Garden", "min": 200.0, "max": 600.0, "price": 330.0, "av": 4000.0, "food": 4.5, "sound": 4.0, "dance": 4.0, "score": 4.27, "note": "~15 min south of Hadera. Its dance floor is set apart from the tables (Google), and the buffet variety is praised. Several deals required 300-guest minimums, so likely too big for you. Shading and design cost extra."}, {"tier": "Mid", "name": "Hofit | חופית", "area": "Kfar Vitkin (S of Hadera)", "type": "Small indoor venue", "min": 100.0, "max": 250.0, "price": 340.0, "av": 0.0, "food": 4.5, "sound": 3.0, "dance": 3.0, "score": 3.98, "note": "Culinary focus. All-in packages (~₪320–350) often include DJ, design and AV, which can cut separate DJ and design spend."}, {"tier": "Mid", "name": "Gaya Hadera | גאיה חדרה", "area": "Hadera", "type": "Garden + hall", "min": 100.0, "max": 0, "price": 375.0, "av": 5000.0, "food": 4.0, "sound": 3.0, "dance": 3.0, "score": 3.77, "note": "Reviewers advise negotiating tiered pricing. AV is often extra. Google: two complaints about salty food and very loud music, and an AC failure during an August event."}, {"tier": "Mid", "name": "Eco | אקו", "area": "Hadera", "type": "Nature garden", "min": 250.0, "max": 600.0, "price": 375.0, "av": 8700.0, "food": 4.0, "sound": 3.5, "dance": 3.0, "score": 3.81, "note": "One reviewer mentions a 250-guest minimum, so confirm they'll do 150–200. AV is a large add-on (~₪8,700). Lots of price data."}, {"tier": "Mid", "name": "Carmela | כרמלה", "area": "Yagur", "type": "Indoor + outdoor", "min": 100.0, "max": 350.0, "price": 390.0, "av": 4500.0, "food": 4.5, "sound": 3.0, "dance": 3.0, "score": 3.85, "note": "Food is consistently praised. A 'full wedding' package (venue + photographer + DJ + AV) was reported at ~₪375–400/guest, so compare it against booking separately. Kosher."}, {"tier": "Mid", "name": "White", "area": "Pardes Hanna", "type": "Boutique garden", "min": 100.0, "max": 400.0, "price": 395.0, "av": 0.0, "food": 4.0, "sound": 4.0, "dance": 4.0, "score": 4.02, "note": "Designed for small weddings, with headcount-based price tiers. The price includes AV and basic design. One Friday-noon couple paid ₪391 including the mandatory shading. Google mentions a vegetarian-leaning menu; meat upg"}, {"tier": "Mid", "name": "Villa Nona | וילה נונה", "area": "Caesarea", "type": "Boutique indoor + outdoor", "min": 100.0, "max": 300.0, "price": 400.0, "av": 3000.0, "food": 5.0, "sound": 3.0, "dance": 3.0, "score": 3.94, "note": "Reviewers repeatedly call it ideal for 100–200 guests, and its food is the best-rated in the set. Its indoor + outdoor layout helps with heat. No prices appear in reviews, so the ₪400 is an ESTIMATE; request a quote."}, {"tier": "High", "name": "Luca | לוקא", "area": "Mishmar HaSharon (S of Hadera)", "type": "Designed hall + garden", "min": 100.0, "max": 0, "price": 430.0, "av": 11000.0, "food": 5.0, "sound": 4.0, "dance": 3.0, "score": 4, "note": "Chef-level food. It gets expensive with extras (AV ~₪11k, DJ stage ₪2.5k, event-manager tip). One reviewer says the dance floor is a bit off-center."}, {"tier": "High", "name": "Kesar Yam | קיסר ים", "area": "Caesarea", "type": "Hall by the sea", "min": 100.0, "max": 350.0, "price": 450.0, "av": 5000.0, "food": 4.5, "sound": 3.0, "dance": 3.0, "score": 3.64, "note": "Fixed pricing with little negotiation reported, plus a Friday surcharge. Google describes a medium-sized dance floor."}, {"tier": "—", "name": "Burj Binyamina | בורג' בנימינה", "area": "Binyamina", "type": "Historic garden", "min": 0, "max": 600.0, "price": 450.0, "av": 7000.0, "food": 3.0, "sound": 3.0, "dance": 3.0, "score": 3.33, "note": "NOT RECOMMENDED. It has the lowest mit4mit score here, one couple reports food running out, and another found the venue hard to work with. Included for completeness."}, {"tier": "High", "name": "Kochav HaYam | כוכב הים", "area": "Sdot Yam", "type": "Seafront garden", "min": 0, "max": 0, "price": 650.0, "av": 0.0, "food": 4.5, "sound": 3.0, "dance": 3.0, "score": 3.15, "note": "The 2 most recent reported prices (₪650–800, including design) are far above older ones, so verify. Lower mit4mit score."}], "extrasSheet": [{"name": "דיג'יי (DJs)", "base": 7040.909091}, {"name": "צילום (Photographers)", "base": 9320.0}, {"name": "איפור ושיער (Makeup & Hair)", "base": 2916.666667}, {"name": "שמלת כלה (Dresses)", "base": 4500.0}, {"name": "עיצוב ופרחים (Design & Flowers)", "base": 2000.0}, {"name": "צלם מגנטים או פולארויד וכו'", "base": 2500.0}, {"name": "עיצוב וכיף", "base": 1000.0}, {"name": "צ'יפנוקים (אטרקציות/זוהרים)", "base": 500.0}, {"name": "אלכוהול (שדרוג/רכש עצמי)", "base": 1000.0}, {"name": "טיפים לצוות ולספקים", "base": 2405.0}]};
+const SEG = {student:'סטודנטים (של תומר)',friend:'חברים',work:'עבודה',famext:'משפחה מורחבת',famclose:'משפחה קרובה (S)',pfriends:'חברים של ההורים'};
+const CIRCLES = ['S','A','B','C','D'];
+const SUPCAT = {dj:'DJ',photo:'צילום',makeup:'איפור ושיער',dress:'שמלה',design:'עיצוב ופרחים'};
+const AVG = {dj:7040.91,photo:9320,makeup:2916.67,dress:4500,design:2000};
+const PRESET = {
+  Low:{dj:'DJ Hadar Israel',photo:'Koala Photographers',makeup:'Yael Shefer',dress:'Alexa Bridal',design:'Shoval Productions'},
+  Mid:{dj:'Kangaroo DJs',photo:'Katom Photographers',makeup:'Naama Rivlin',dress:'Natella',design:'Hilula Design & Florals'},
+  High:{dj:'Paprika',photo:'Glusha Photographers',makeup:'Noa Atias',dress:'Arava Polak',design:'Shoshan Tzachor'}};
+const KEY='wedding-econ-v1';
+const SITE=true;
+
+function NEWITEMS(){return []}
+function migrate10(o){ if(!o.sup)o.sup={}; o.sup.items=NEWITEMS(); o.extras=[]; delete o.bus; if(!o.venue)o.venue={}; Object.assign(o.venue,{src:'ours',min:130,pMin:390,pExtra:390}); }
+function migrate11(o){}
+function DEF(){
+  return {
+    guests: SITE? [] : JSON.parse(JSON.stringify(DATA.guests||[])),
+    att:{base:{S:.95,A:.88,B:.80,C:.70,D:.60},
+         loc:{'צפון':1,'מרכז / צפון':.97,'מרכז':.90,'צפון / ירושלים':.90,'אוקראינה':.68},
+         pPlus:.5, sys:.04},
+    gift:{seg:{student:375,friend:500,work:375,famext:500,famclose:500,pfriends:500},
+          spouse:1, kid:100, cv:.25, sysCv:.10, noGift:.03, coverPP:370},
+    venue:{src:'ours', min:130, pMin:390, pExtra:390, kidPct:.5, kidPrice:245, av:0, reserve:.10},
+    sup:{uplift:.05, items:SITE? [] : NEWITEMS()},
+    extras:[], cont:.10,
+    fund:{savings:SITE?0:15000, parents:0},
+    filt:{c:{S:true,A:true,B:true,C:true,D:true}, l:{}},
+    sim:{n:4000, seed:7}, ver:11,
+    view:{costMode:'marginal', sortK:null, sortDir:1}
+  };
+}
+let S;
+function loadState(o){ if(!o.ver||o.ver<2){ if(o.gift) o.gift.spouse=1; o.ver=2; } if(o.ver<3){ migrate3(o); o.ver=3; } if(o.ver<4){ migrate4(o); o.ver=4; } if(o.ver<5){ o.ver=5; } if(o.ver<6){ (o.guests||[]).forEach(g=>{ if(g.cat==='משפחה יוליה אוקראינה') g.cov=false; }); o.ver=6; } if(o.ver<7){ if(o.bus) o.bus.on=false; o.ver=7; } if(o.ver<8){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){g.pOv=.6;g.gift=450;g.cov=false}}); o.ver=8; } if(o.ver<9){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){if(g.pOv===.6)g.pOv=null;if(g.gift===450)g.gift=null;}});if(o.att&&o.att.loc&&o.att.loc['אוקראינה']===.35)o.att.loc['אוקראינה']=.68; o.ver=9; } if(o.ver<10){ migrate10(o); o.ver=10; } if(o.ver<11){ migrate11(o); o.ver=11; }  o.ver=Math.max(o.ver||0,11); return merge(DEF(),o); }
+try{ const raw=localStorage.getItem(KEY); S = raw? loadState(JSON.parse(raw)) : DEF(); }catch(e){ S=DEF(); }
+function migrate3(o){}
+function oldSupPrice(o,c){const sel=o.sup.sel?.[c]??'avg',up=o.sup.uplift??.05;
+  if(sel==='none')return 0; if(sel==='custom')return +(o.sup.custom?.[c])||0; if(sel==='avg')return AVG[c]*(1+up);
+  const p=DATA.sup[c].find(x=>x.name===sel); return p?p.price*(1+up):0;}
+function migrate4(o){ if(!o.sup||o.sup.items) return;
+  o.sup.items=Object.keys(SUPCAT).map(c=>{const sel=o.sup.sel?.[c]??'avg';return {cat:c,name:SUPCAT[c],amt:Math.round(oldSupPrice(o,c)),src:sel==='avg'?'ממוצע הגיליון':sel==='custom'?'ידני':sel==='none'?'כלול במקום':sel}});
+  delete o.sup.sel; delete o.sup.custom; }
+function merge(d,o){ for(const k in o){ if(o[k]&&typeof o[k]==='object'&&!Array.isArray(o[k])&&d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k])) merge(d[k],o[k]); else d[k]=o[k]; } return d; }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); if(!window.CLOUD) $('#saveState').textContent='נשמר בדפדפן הזה'; }catch(e){ if(!window.CLOUD) $('#saveState').textContent='שמירה אוטומטית לא זמינה, השתמשו בייצוא'; }
+  if(window.CLOUD&&window.CLOUD.ready) window.CLOUD.push(JSON.stringify(S)); }
+window.applyRemoteState=function(json){ try{ if(json===JSON.stringify(S))return; S=loadState(JSON.parse(json)); try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} renderControls();syncShows();compute(); }catch(e){ console.error(e) } };
+window.getStateJSON=()=>JSON.stringify(S);
+
+/* ---------- utils ---------- */
+const $=s=>document.querySelector(s);
+const fmt=(x,d=0)=>Math.round(x).toLocaleString('he-IL',{maximumFractionDigits:d});
+const ils=x=>`<span class="num">${x<0?'−':''}₪${fmt(Math.abs(x))}</span>`;
+const ilsS=x=>`<span class="num ${x<0?'neg':'pos'}">${x<0?'−':'+'}₪${fmt(Math.abs(x))}</span>`;
+const pct=(x,d=0)=>`<span class="num">${(x*100).toFixed(d)}%</span>`;
+const n1=x=>`<span class="num">${x.toFixed(1)}</span>`;
+function get(p){return p.split('.').reduce((o,k)=>o[k],S)}
+function set(p,v){const ks=p.split('.');let o=S;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];o[ks.at(-1)]=v}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function quant(a,q){const s=a.slice().sort((x,y)=>x-y);const i=(s.length-1)*q,lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo)}
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const isCenter=l=>l.includes('מרכז');
+
+/* ---------- model ---------- */
+function fixedCosts(st){
+  const inc=st.sup.items.filter(x=>x.on!==false);
+  const sure=inc.filter(x=>x.sure).reduce((a,x)=>a+(+x.amt||0),0), opt=inc.filter(x=>!x.sure).reduce((a,x)=>a+(+x.amt||0),0);
+  const sup=sure+opt;
+  const ex=st.extras.reduce((a,e)=>a+(+e.amt||0),0);
+  const cont=(opt+ex)*st.cont; // closed (sure) items have no contingency
+  return {sup,sure,opt,ex,cont,bus:0,total:sup+ex+cont};
+}
+function venueOf(st,src){
+  src = src===undefined? st.venue.src : src;
+  if(src==='ours') return {name:'ההצעה שלנו',tiered:true,reserve:+(st.venue.reserve??.1),min:+st.venue.min,pMin:+st.venue.pMin,pExtra:+st.venue.pExtra,kidPct:+st.venue.kidPct,kidPrice:+(st.venue.kidPrice??245),av:+st.venue.av};
+  const v=DATA.venues[src]; const p=v.price*(1+st.sup.uplift);
+  return {name:v.name,tiered:false,reserve:null,min:+v.min||0,pMin:p,pExtra:p,kidPct:+st.venue.kidPct,kidPrice:p*(+st.venue.kidPct),av:v.av};
+}
+function venueCost(v,A,K){ return v.min*v.pMin + Math.max(0,A-v.min)*v.pExtra + K*v.kidPrice + v.av; }
+function activeGuests(st,circles){
+  return st.guests.filter(g=>g.inc && (circles? circles.includes(g.c) : st.filt.c[g.c]!==false) && st.filt.l[g.loc]!==false);
+}
+function pAttend(st,g){
+  if(g.pOv!==null&&g.pOv!==undefined&&g.pOv!=='') return +g.pOv;
+  let f = st.att.loc[g.loc]; if(f===undefined) f=.9;
+  return (st.att.base[g.c]??.8)*f;
+}
+function giftMean(st,g,adults,kids){
+  if(g.isKid) return (g.gift!==null&&g.gift!==''&&g.gift!==undefined)? +g.gift : st.gift.kid;
+  if(g.cov) return st.gift.coverPP*adults + st.gift.coverPP*st.venue.kidPct*kids;
+  if(g.gift!==null && g.gift!=='' && g.gift!==undefined) return +g.gift;
+  const per=st.gift.seg[g.seg]??450;
+  return per*(1+st.gift.spouse*(adults-1)) + st.gift.kid*kids;
+}
+function simulate(st,opt={}){
+  const n=opt.n||st.sim.n, rnd=mulberry32(opt.seed||st.sim.seed);
+  const G=opt.guests||activeGuests(st,opt.circles);
+  const v=venueOf(st,opt.venue);
+  const fc=fixedCosts(st);
+  const sg=Math.sqrt(Math.log(1+st.gift.cv**2)), sysg=Math.sqrt(Math.log(1+st.gift.sysCv**2));
+  const gauss=()=>{let u=rnd()||1e-9,w=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*w)};
+  const P=G.map(g=>pAttend(st,g));
+  const per=opt.per? G.map(()=>({a:0,k:0,gift:0,att:0})):null;
+  const nets=new Float64Array(n),As=new Float64Array(n),Ks=new Float64Array(n),gifts=new Float64Array(n),venues=new Float64Array(n),centers=new Float64Array(n);
+  let coverSum=0;
+  for(let r=0;r<n;r++){
+    const eps=gauss()*st.att.sys, gm=Math.exp(gauss()*sysg-sysg*sysg/2);
+    let A=0,K=0,gift=0,cen=0,cov=0;
+    for(let i=0;i<G.length;i++){
+      const g=G[i];
+      const u1=rnd(),u2=rnd(),u3=rnd(),z=gauss();
+      if(u1 >= clamp(P[i]+eps,0,.995)) continue;
+      const kids=g.isKid? 1 : Math.min(g.kids||0, g.pt==='fixed'? g.plus:0);
+      let adults=g.isKid? 0 : 1+(g.pt==='fixed'? g.plus-kids:0)+((g.pt==='opt'&&u2<st.att.pPlus)?1:0);
+      let m=giftMean(st,g,adults,kids), gv;
+      if(g.cov){ gv=m; cov+=m; }
+      else { gv = u3<st.gift.noGift? 0 : m*Math.exp(z*sg-sg*sg/2)*gm; }
+      A+=adults;K+=kids;gift+=gv; if(isCenter(g.loc)) cen+=adults+kids;
+      if(per){per[i].a+=adults;per[i].k+=kids;per[i].gift+=gv;per[i].att++;}
+    }
+    const vc=venueCost(v,A,K);
+    As[r]=A;Ks[r]=K;gifts[r]=gift;venues[r]=vc;centers[r]=cen;coverSum+=cov;
+    nets[r]=gift+(+st.fund.parents)+(+st.fund.savings)-vc-fc.total;
+  }
+  const res={n,G,v,fc,nets:[...nets],As:[...As],Ks:[...Ks],gifts:[...gifts],venues:[...venues],
+    eNet:mean(nets),eA:mean(As),eK:mean(Ks),eGift:mean(gifts),eVenue:mean(venues),eCenter:mean(centers),eCover:coverSum/n};
+  res.pAboveMin = As.filter(a=>a>=v.min).length/n;
+  res.cap = v.reserve===null? Infinity : Math.round(v.min*(1+v.reserve));
+  res.pOver = As.filter(a=>a>res.cap).length/n;
+  res.eExtraAdults = mean(As.map(a=>Math.max(0,a-v.min)));
+  res.mcAdult = v.tiered? v.pExtra*res.pAboveMin : v.pMin*(As.filter(a=>a>=v.min).length/n);
+  res.kidCost = v.kidPrice;
+  res.avgCost = (res.eVenue+fc.total)/(res.eA+res.eK*v.kidPrice/v.pMin);
+  if(per){ res.per=per.map((p,i)=>({g:G[i],pa:P[i],eA:p.a/n,eK:p.k/n,eGift:p.gift/n})); }
+  return res;
+}
+function contrib(R,p){ // net contribution of one row
+  const st=S;
+  if(st.view.costMode==='avg') return p.eGift - (p.eA+p.eK*R.v.kidPrice/R.v.pMin)*R.avgCost;
+  return p.eGift - p.eA*R.mcAdult - p.eK*R.kidCost;
+}
+
+/* ---------- charts ---------- */
+const tip=$('#tip');
+function showTip(e,html){tip.innerHTML=html;tip.style.display='block';const x=Math.min(e.clientX+12,innerWidth-270);tip.style.left=x+'px';tip.style.top=(e.clientY+14)+'px'}
+function hideTip(){tip.style.display='none'}
+function bindTips(root){root.querySelectorAll('[data-tip]').forEach(el=>{el.addEventListener('mousemove',e=>showTip(e,el.dataset.tip));el.addEventListener('mouseleave',hideTip)})}
+function histogram(el,vals,o){
+  const W=el.clientWidth||700,H=o.h||220,m={l:46,r:12,t:12,b:30};
+  let lo=Math.min(...vals),hi=Math.max(...vals); (o.extra||[]).forEach(x=>{lo=Math.min(lo,x.v);hi=Math.max(hi,x.v)});
+  const nb=o.bins||32; const bw=(hi-lo)/nb||1; const cnt=new Array(nb).fill(0);
+  vals.forEach(v=>cnt[Math.min(nb-1,Math.floor((v-lo)/bw))]++);
+  const mx=Math.max(...cnt); const X=v=>m.l+(v-lo)/(hi-lo||1)*(W-m.l-m.r); const Y=c=>H-m.b-c/mx*(H-m.t-m.b);
+  let s=`<svg width="${W}" height="${H}" style="direction:ltr;display:block">`;
+  for(let i=0;i<=4;i++){const yv=mx*i/4;s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(yv)}" y2="${Y(yv)}" stroke-dasharray="${i?2:0},3"/>`;s+=`<text x="${m.l-6}" y="${Y(yv)+4}" text-anchor="end">${(yv/vals.length*100).toFixed(0)}%</text>`}
+  cnt.forEach((c,i)=>{const x0=lo+i*bw,x1=x0+bw;const px=X(x0)+1,w=Math.max(1,X(x1)-X(x0)-2);
+    const col=o.color? o.color(x0,x1):'var(--pos)';
+    s+=`<rect x="${px}" y="${Y(c)}" width="${w}" height="${Math.max(0,H-m.b-Y(c))}" rx="2" fill="${col}"/>`;
+    s+=`<rect x="${X(x0)}" y="${m.t}" width="${X(x1)-X(x0)}" height="${H-m.t-m.b}" fill="transparent" data-tip="${o.tipf(x0,x1)}<br><b>${(c/vals.length*100).toFixed(1)}%</b> מהסימולציות"/>`});
+  const ticks=5;for(let i=0;i<=ticks;i++){const v=lo+(hi-lo)*i/ticks;s+=`<text x="${X(v)}" y="${H-10}" text-anchor="middle">${o.xf(v)}</text>`}
+  (o.lines||[]).forEach(L=>{s+=`<line x1="${X(L.v)}" x2="${X(L.v)}" y1="${m.t}" y2="${H-m.b}" stroke="var(--text)" stroke-width="${L.w||1.5}" stroke-dasharray="${L.dash||''}"/><text x="${X(L.v)}" y="${m.t+8}" text-anchor="${L.anchor||'middle'}" style="fill:var(--text);font-weight:500">${L.label}</text>`});
+  s+='</svg>'; el.innerHTML=s; bindTips(el);
+}
+const kfmt=v=>(v<0?'−':'')+'₪'+(Math.abs(v)>=1000? (Math.abs(v)/1000).toFixed(0)+'k':fmt(Math.abs(v)));
+
+/* ---------- render ---------- */
+let R=null;
+function compute(){
+  R=simulate(S,{per:true});
+  renderKPIs();renderOverview();renderGuests();renderAttMatrix();renderGiftTable();
+  scheduleScen();
+}
+function renderKPIs(){
+  const nets=R.nets, p10=quant(nets,.1),p50=quant(nets,.5),p90=quant(nets,.9);
+  const fund=+S.fund.savings+(+S.fund.parents);
+  const pOk=nets.filter(x=>x>=0).length/nets.length;
+  const cost=R.eVenue+R.fc.total;
+  $('#kpis').innerHTML=`
+   <div class="kpi"><div class="l">שורה תחתונה, כולל החיסכון (חציון)</div><div class="v ${p50<0?'neg':'pos'}">${ilsS(p50)}</div><div class="s">ממוצע ${ils(R.eNet)} · בלי החיסכון ${ils(p50-fund)}</div></div>
+   <div class="kpi"><div class="l">טווח סביר (80% מהמקרים)</div><div class="v" style="font-size:17px">${ils(p10)} עד ${ils(p90)}</div><div class="s">P10 עד P90</div></div>
+   <div class="kpi"><div class="l">סיכוי לסיים בלי חוב</div><div class="v">${pct(pOk)}</div><div class="s">כולל חיסכון ${ils(fund)}</div></div>
+   <div class="kpi"><div class="l">מבוגרים צפויים</div><div class="v">${n1(R.eA)}</div><div class="s">+ ${n1(R.eK)} ילדים · התחייבות ${R.v.min}${isFinite(R.cap)?` · רזרבה עד ${R.cap}`:''} · ${pct(R.pAboveMin)} מגיעים למינימום</div></div>
+   <div class="kpi"><div class="l">עלות צפויה</div><div class="v">${ils(cost)}</div><div class="s">${ils(cost/(R.eA+R.eK))} לראש</div></div>
+   <div class="kpi"><div class="l">מתנות צפויות</div><div class="v">${ils(R.eGift)}</div><div class="s">${ils(R.eGift/(R.eA+R.eK))} לראש שמגיע</div></div>`;
+}
+function renderOverview(){
+  $('#nRuns').textContent=fmt(R.n);
+    const p10=quant(R.nets,.1),p50=quant(R.nets,.5),p90=quant(R.nets,.9);
+  histogram($('#histNet'),R.nets,{bins:34,xf:kfmt,extra:[{v:0}],
+    color:(a,b)=> (a+b)/2<0?'var(--neg)':'var(--pos)',
+    tipf:(a,b)=>`תוצאה בין ${kfmt(a)} ל-${kfmt(b)}`,
+    lines:[{v:p10,label:'P10',dash:'3,3',w:1},{v:p50,label:'חציון'},{v:p90,label:'P90',dash:'3,3',w:1},{v:0,label:'0',dash:'6,4',w:1.5,anchor:'start'}]});
+  const fc=R.fc, v=R.v;
+  const kidCostE=R.eK*v.kidPrice, extraE=R.eExtraAdults*v.pExtra;
+  const steps=[
+    ['התחייבות: '+v.min+' מנות × ₪'+fmt(v.pMin),-v.min*v.pMin],
+    ...(v.av?[['תוספות מקום',-v.av]]:[]),
+    ['הוצאות סגורות',-fc.sure],...(fc.opt?[['לא סגורות שסימנתם',-fc.opt]]:[]),...(fc.ex?[['הוצאות נוספות',-fc.ex]]:[]),...(fc.cont?[['מרווח ביטחון (על הלא סגורות)',-fc.cont]]:[]),
+    ['=SUB','לפני שהגיע אורח אחד'],
+    ['מבוגרים מעל ההתחייבות (צפי '+n1(R.eExtraAdults)+')',-extraE],
+    ['ילדים (צפי '+n1(R.eK)+' × ₪'+fmt(v.kidPrice)+')',-kidCostE],
+    ['מתנות',R.eGift-R.eCover],
+    ...(R.eCover?[['כיסוי עלות (אוקראינה)',R.eCover]]:[]),
+    ...(+S.fund.parents?[['הורים',+S.fund.parents]]:[]),
+    ...(+S.fund.savings?[['החיסכון שלכם',+S.fund.savings]]:[]),
+    ['=SUB','שורה תחתונה (ממוצע)']];
+  let run=0,lo=0,hi=0;const rows=[];
+  for(const st of steps){ if(st[0]==='=SUB'){rows.push({sub:true,l:st[1],v:run});continue}
+    const a=run;run+=st[1];rows.push({l:st[0],v:st[1],a,b:run});lo=Math.min(lo,run,a);hi=Math.max(hi,run,a);}
+  const X=x=>(x-lo)/(hi-lo||1)*100;
+  let h=rows.map(r=>r.sub
+    ? `<div class="b" style="border-top:1px solid var(--line);padding-top:5px"><b>${r.l}</b><div class="track" style="direction:ltr;position:relative;background:none"><div style="position:absolute;left:${X(Math.min(0,r.v))}%;width:${Math.abs(X(r.v)-X(0))}%;top:0;bottom:0;background:var(--muted);border-radius:3px"></div></div><b class="r">${ilsS(r.v)}</b></div>`
+    : `<div class="b"><span>${r.l}</span><div class="track" style="direction:ltr;position:relative;background:none"><div style="position:absolute;left:${X(Math.min(r.a,r.b))}%;width:${Math.max(.4,Math.abs(X(r.b)-X(r.a)))}%;top:0;bottom:0;background:${r.v<0?'var(--neg)':'var(--pos)'};border-radius:3px"></div><div style="position:absolute;left:${X(0)}%;top:-3px;bottom:-3px;border-left:1px dashed var(--muted)"></div></div><span class="r">${ilsS(r.v)}</span></div>`).join('');
+  $('#costBars').innerHTML=h;
+  histogram($('#histAdults'),R.As,{bins:Math.max(8,Math.min(30,Math.round(Math.max(...R.As)-Math.min(...R.As)))),h:200,xf:v=>fmt(v),extra:[{v:R.v.min}].concat(isFinite(R.cap)&&R.cap<=Math.max(...R.As)+5?[{v:R.cap}]:[]),
+     color:(a,b)=>b<=R.v.min?'var(--neg)':'var(--pos)',tipf:(a,b)=>`${fmt(a)}–${fmt(b)} מבוגרים`,lines:[{v:R.v.min,label:'התחייבות '+R.v.min}].concat(isFinite(R.cap)&&R.cap<=Math.max(...R.As)+5?[{v:R.cap,label:'רזרבה '+R.cap,dash:'4,3',w:1,anchor:'end'}]:[])});
+  // insights
+  const waste=mean(R.As.map(a=>Math.max(0,R.v.min-a)))*R.v.pMin;
+  const per=R.per.map(p=>({...p,c:contrib(R,p)}));
+  const byC={};per.forEach(p=>{byC[p.g.c]=(byC[p.g.c]||0)+p.c});
+  const worst=Object.entries(byC).sort((a,b)=>a[1]-b[1])[0];
+  const segN={};per.forEach(p=>{const k=p.g.cov?'cov':p.g.seg;segN[k]=(segN[k]||0)+p.c});
+  const fund2=+S.fund.savings+(+S.fund.parents);
+  let ins=`<h2>תובנות</h2>`;
+  ins+=`<div class="callout">כל מבוגר נוסף מעל המינימום עולה <b>${ils(R.v.pExtra)}</b>, אבל מתחת למינימום הוא "בחינם", כי משלמים על המנה בכל מקרה. בתמהיל הנוכחי מגיעים ל-${R.v.min} מבוגרים ב-<b>${pct(R.pAboveMin)}</b> מהמקרים, ולכן העלות השולית הצפויה של מבוגר היא <b>${ils(R.mcAdult)}</b>.</div>`;
+  if(R.pOver>.01) ins+=`<div class="callout warn">ב-<b>${pct(R.pOver)}</b> מהמקרים מגיעים יותר מ-${R.cap} מבוגרים, כלומר יותר ממה שהרזרבה (${Math.round(R.v.reserve*100)}%) מכסה. כדאי לעדכן את המספר המוזמן מול המקום שבוע לפני.</div>`;
+  if(waste>500) ins+=`<div class="callout warn">בממוצע משלמים <b>${ils(waste)}</b> על מנות ריקות, כי לא מגיעים למינימום. אפשר להזמין עוד אנשים או לנסות להוריד את המינימום במשא ומתן.</div>`;
+  ins+=`<div class="callout ${worst&&worst[1]<0?'warn':''}">המעגל עם התרומה הנמוכה ביותר הוא <b>${worst?worst[0]:''}</b> (${worst?ilsS(worst[1]):''}). ${worst&&worst[1]<0?'קיצוץ שלו משפר את התוצאה בערך בסכום הזה.':'גם הוא מכניס יותר ממה שהוא עולה, אז קיצוץ שלו לא יחסוך כסף.'}</div>`;
+  const gap=quant(R.nets,.5);
+  ins+=`<div class="callout ${gap<0?'bad':''}">שורה תחתונה (כולל חיסכון${+S.fund.parents?' והורים':''}): ${ilsS(gap)}. ${gap<0?'בתרחיש האמצעי חסר עוד הסכום הזה.':'בתרחיש האמצעי החיסכון מכסה את הכול.'}</div>`;
+  ins+='<div id="reachBox"></div>';
+  $('#insights').innerHTML=ins;
+  scheduleDiff();
+  clearTimeout(window._rt);window._rt=setTimeout(renderReach,400);
+}
+/* ---------- what changed vs defaults ---------- */
+function diffLabel(p){const k=p.split('.');
+  const L={'att.pPlus':'סיכוי שה-+1 מגיע','att.sys':'אי־ודאות מערכתית בהגעה','gift.spouse':'מקדם בן/בת זוג','gift.kid':'מתנה לכל ילד','gift.cv':'פיזור אישי במתנות','gift.sysCv':'אי־ודאות מערכתית במתנות','gift.noGift':'סיכוי שאין מתנה','gift.coverPP':'כיסוי לראש','venue.src':'מקום האירוע','venue.min':'התחייבות (מינימום)','venue.pMin':'מחיר לראש','venue.pExtra':'מחיר מבוגר נוסף','venue.kidPct':'מחיר ילד (מקומות מהרשימה)','venue.kidPrice':'מחיר ילד','venue.av':'תוספות מקום','venue.reserve':'רזרבה','sup.uplift':'התייקרות 2027','sup.items':'ספקים','extras':'הוצאות נוספות','cont':'מרווח ביטחון','bus.on':'הסעה פעילה','bus.type':'סוג רכב','bus.n':'מספר רכבים','bus.price':'מחיר לרכב','bus.boost':'בונוס הגעה מהסעה','fund.savings':'חיסכון','fund.parents':'עזרת הורים','guests':'רשימת המוזמנים'};
+  if(L[p])return L[p];
+  if(k[0]==='att'&&k[1]==='base')return 'הגעה: מעגל '+k[2];
+  if(k[0]==='att'&&k[1]==='loc')return 'הגעה: מיקום '+k.slice(2).join('.');
+  if(k[0]==='gift'&&k[1]==='seg')return 'מתנה: '+(SEG[k[2]]||k[2]);
+  if(k[0]==='filt')return 'נכלל בחישוב: '+(k[1]==='c'?'מעגל ':'מיקום ')+k.slice(2).join('.');
+  return p;}
+function diffVal(p,v){if(v===undefined)return '—';if(typeof v==='boolean')return v?'כן':'לא';
+  if(p==='sup.items')return '₪'+fmt(v.reduce((a,x)=>a+(+x.amt||0),0));
+  if(p==='extras')return '₪'+fmt(v.reduce((a,x)=>a+(+x.amt||0),0));
+  if(p==='venue.src')return v==='ours'?'ההצעה שלנו':DATA.venues[v]?.name;
+  if(typeof v==='number'){ if(/^(att\.|gift\.(cv|sysCv|noGift)|venue\.(kidPct|reserve)|cont|sup\.uplift|bus\.boost)/.test(p)) return Math.round(v*100)+'%'; if(p==='gift.spouse')return v.toFixed(2); return /min|n$/.test(p)?fmt(v):'₪'+fmt(v);}
+  return String(v);}
+function findDiffs(){const D=DEF(),out=[];
+  const walk=(a,b,p)=>{const keys=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);
+    for(const k of keys){const pp=p?p+'.'+k:k; if(['view','sim','ver'].includes(pp))continue; if(SITE&&['guests','sup','extras','fund','venue'].includes(pp))continue; if(pp==='bus.cap')continue;
+      const x=a?.[k],y=b?.[k];
+      if(pp==='guests'){const n=guestChanges(x||[],y||[]);if(n)out.push({p:pp,cur:n+' שינויים',def:'הרשימה המקורית'});continue}
+      if(x&&typeof x==='object'&&!Array.isArray(x)||y&&typeof y==='object'&&!Array.isArray(y)){walk(x,y,pp);continue}
+      let yy=y; if(pp.startsWith('filt.')&&yy===undefined)yy=true; let xx=x; if(pp.startsWith('filt.')&&xx===undefined)xx=true;
+      if(JSON.stringify(xx)!==JSON.stringify(yy)&&!(typeof xx==='number'&&typeof yy==='number'&&Math.abs(xx-yy)<1e-9))out.push({p:pp,cur:diffVal(pp,xx),def:diffVal(pp,yy)});}};
+  walk(S,D,'');return out;}
+function guestChanges(a,b){const F=['n','cat','c','loc','plus','pt','kids','seg','cov','inc','gift','isKid','pOv'];const mb=new Map(b.map(g=>[g.id,g]));let n=0;
+  for(const g of a){const d=mb.get(g.id);if(!d){n++;continue}if(F.some(f=>JSON.stringify(g[f]??null)!==JSON.stringify(d[f]??null)))n++;mb.delete(g.id)}return n+mb.size;}
+function revertPath(st,p){const D=DEF();const ks=p.split('.');let o=st,d=D;
+  for(let i=0;i<ks.length-1;i++){o=o[ks[i]];d=d?.[ks[i]]}
+  const k=ks.at(-1);const v=d?.[k];if(v===undefined)delete o[k];else o[k]=JSON.parse(JSON.stringify(v));}
+let diffT=null;function scheduleDiff(){clearTimeout(diffT);diffT=setTimeout(renderDiff,250)}
+function renderDiff(){const el=$('#diffCard');const ds=findDiffs();
+  if(!ds.length){el.style.display='none';return}
+  const n=1500,base=simulate(S,{n}).eNet;
+  for(const d of ds){const c=clone();revertPath(c,d.p);d.imp=simulate(c,{n}).eNet-base;}
+  ds.sort((a,b)=>Math.abs(b.imp)-Math.abs(a.imp));
+  const def=simulate(DEF(),{n}).eNet;
+  el.style.display='';
+  el.innerHTML=`<h2>מה שונה אצלכם מברירת המחדל</h2>
+   <p class="hint">עם ברירות המחדל התוצאה הצפויה היא ${ilsS(def)}, ואצלכם ${ilsS(base)}. בעמודה האחרונה: כמה התוצאה הייתה משתנה אם מחזירים רק את השינוי הזה. השינויים משפיעים גם זה על זה, ולכן הסכומים לא תמיד מסתכמים בדיוק להפרש.</p>
+   <div class="tw" style="max-height:none"><table><tr><th>מה השתנה</th><th>אצלכם</th><th>ברירת מחדל</th><th class="r">אם מחזירים</th><th></th></tr>`+
+   ds.map(d=>`<tr><td>${diffLabel(d.p)}</td><td>${d.cur}</td><td>${d.def}</td><td class="r">${Math.abs(d.imp)<50?'<span class="mini">~0</span>':ilsS(d.imp)}</td><td><button data-revert="${d.p}">החזר</button></td></tr>`).join('')+
+   `</table></div>`;}
+function renderReach(){const el=$('#reachBox');if(!el||!R.v.tiered)return;
+  const G=activeGuests(S);let maxA=0,potA=0;
+  for(const g of G){if(g.isKid)continue;const k=Math.min(g.kids||0,g.pt==='fixed'?g.plus:0);const base=1+(g.pt==='fixed'?g.plus-k:0);maxA+=base+(g.pt==='opt'?1:0);potA+=base+(g.pt==='opt'?S.att.pPlus:0);}
+  const tmpl={c:'B',loc:'צפון',plus:1,pt:'opt',kids:0,seg:'friend',cov:false,inc:true,gift:null,isKid:false,pOv:null,n:'x',cat:'x'};
+  const run=k=>{const st=clone();for(let i=0;i<k;i++)st.guests.push({...tmpl,id:90000+i});return simulate(st,{n:800});};
+  const r0=simulate(S,{n:800});
+  const find=target=>{if(r0.pAboveMin>=target)return 0;let lo=0,hi=80;while(hi-lo>1){const m=(lo+hi)>>1;run(m).pAboveMin>=target?hi=m:lo=m;}return hi;};
+  const k50=find(.5),k80=find(.8);const r50=run(k50),r80=run(k80);
+  el.innerHTML=`<div class="callout ${r0.pAboveMin<.5?'warn':''}"><b>האם תגיעו ל-${R.v.min} מבוגרים?</b> ברשימה יש <b>${fmt(maxA)}</b> מבוגרים אם כולם מגיעים וכל ה-+1 באים (${n1(potA)} בממוצע, כי רק חלק מה-+1 יבואו). בפועל צפויים <b>${n1(R.eA)}</b>, כי לא כל מי שמוזמן מגיע. ההתחייבות היא התחייבות <b>לשלם</b> על ${R.v.min}, לא ערובה שיגיעו.<br>
+   ${k50===0?`כבר עכשיו מגיעים ל-${R.v.min} ב-<b>${Math.round(r0.pAboveMin*100)}%</b> מהמקרים${k80?`, ולסיכוי 80% צריך עוד בערך <b>${k80}</b> הזמנות`:''}.`:`כדי להגיע ל-${R.v.min} בסיכוי 50% צריך עוד בערך <b>${k50}</b> הזמנות, ובסיכוי 80% עוד בערך <b>${k80}</b>.`} החישוב מניח הזמנה "טיפוסית": חבר ממעגל B מהצפון עם +1 אופציונלי. ${k50?`ההזמנות האלה גם משפרות את השורה התחתונה: ${ilsS(quant(r50.nets,.5)-quant(r0.nets,.5))} עם ${k50} הזמנות, ו-${ilsS(quant(r80.nets,.5)-quant(r0.nets,.5))} עם ${k80}, כי המנות שלהן כבר משולמות.`:''}</div>`;}
+/* guests */
+function renderFilters(){
+  $('#fCircles').innerHTML='<span class="mini">מעגלים:</span>'+CIRCLES.map(c=>`<label class="chip"><input type="checkbox" data-fc="${c}" ${S.filt.c[c]!==false?'checked':''}>${c}</label>`).join('');
+  $('#fLocs').innerHTML='<span class="mini">מיקום:</span>'+Object.keys(S.att.loc).map(l=>`<label class="chip"><input type="checkbox" data-fl="${l}" ${S.filt.l[l]!==false?'checked':''}>${l}</label>`).join('');
+}
+function pivot(key,keys){
+  const rows=keys.map(k=>{const ps=R.per.filter(p=>p.g[key]===k);const all=S.guests.filter(g=>g[key]===k&&g.inc);
+    return {k,inv:all.length,max:all.reduce((a,g)=>a+1+g.plus,0),eP:ps.reduce((a,p)=>a+p.eA+p.eK,0),eG:ps.reduce((a,p)=>a+p.eGift,0),c:ps.reduce((a,p)=>a+contrib(R,p),0),on:ps.length>0}});
+  const T=rows.reduce((t,r)=>({inv:t.inv+r.inv,max:t.max+r.max,eP:t.eP+r.eP,eG:t.eG+r.eG,c:t.c+r.c}),{inv:0,max:0,eP:0,eG:0,c:0});
+  return `<table><tr><th></th><th class="r">הזמנות</th><th class="r">מקס׳ אנשים</th><th class="r">צפי מגיעים</th><th class="r">מתנות צפויות</th><th class="r">תרומה נטו</th></tr>`+
+   rows.map(r=>`<tr style="${r.on?'':'opacity:.45'}"><td><b>${r.k}</b></td><td class="r">${r.inv}</td><td class="r">${r.max}</td><td class="r">${n1(r.eP)}</td><td class="r">${ils(r.eG)}</td><td class="r">${ilsS(r.c)}</td></tr>`).join('')+
+   `<tr><td><b>סה״כ</b></td><td class="r"><b>${T.inv}</b></td><td class="r"><b>${T.max}</b></td><td class="r"><b>${n1(T.eP)}</b></td><td class="r"><b>${ils(T.eG)}</b></td><td class="r"><b>${ilsS(T.c)}</b></td></tr></table>`+
+   `<div class="mini" style="margin-top:4px"><b>תרומה נטו</b> = בכמה הקבוצה משפרת את התוצאה לעומת מצב שבו לא מזמינים אותה. זה <b>לא רווח</b>: את ההתחייבות ואת הספקים משלמים בכל מקרה. שורות שהוצאו בסינון מוצגות שקופות.</div>`;
+}
+function renderGuests(){
+  $('#pivC').innerHTML=pivot('c',CIRCLES);
+  $('#pivL').innerHTML=pivot('loc',Object.keys(S.att.loc));
+  const perMap=new Map(R.per.map(p=>[p.g.id,p]));
+  const q=($('#gSearch').value||'').trim();
+  let gs=S.guests.filter(g=>!q||g.n.includes(q)||g.cat.includes(q));
+  const val=(g,k)=>{const p=perMap.get(g.id);switch(k){case 'p':return p?p.pa:-1;case 'e':return p?p.eA+p.eK:-1;case 'g':return p?p.eGift:-1e9;case 'c':return p?contrib(R,p):-1e9;case 'c2':return CIRCLES.indexOf(g.c);default:return g[k]}};
+  if(S.view.sortK) gs=gs.slice().sort((a,b)=>{const x=val(a,S.view.sortK),y=val(b,S.view.sortK);return (x>y?1:x<y?-1:0)*S.view.sortDir});
+  const kids=S.guests.filter(g=>g.inc).reduce((a,g)=>a+(g.isKid?1:(g.kids||0)),0);
+  $('#gCount').innerHTML=`${gs.length} שורות · ילדים מוגדרים: <b>${kids}</b>`;
+  const locOpts=l=>Object.keys(S.att.loc).map(x=>`<option ${x===l?'selected':''}>${x}</option>`).join('');
+  const th=(k,t,c='')=>`<th class="sort ${c}" data-sort="${k}">${t}${S.view.sortK===k?(S.view.sortDir>0?' ▲':' ▼'):''}</th>`;
+  let h=`<tr><th>כלול</th>${th('n','שם')}${th('cat','קטגוריה')}${th('c2','מעגל')}${th('loc','מיקום')}<th>ילד/ה</th><th title="כמה מוזמנים בהזמנה, כמו 'סה״כ מוזמנים' בגיליון">מוזמנים</th><th>ילדים</th>${th('seg','קבוצת מתנה')}<th>מכוסה</th><th>הגעה ידנית %</th><th>מתנה ידנית ₪</th>${th('p','הגעה','r')}${th('e','צפי אנשים','r')}${th('g','מתנה צפויה','r')}${th('c','תרומה נטו','r')}<th></th></tr>`;
+  for(const g of gs){
+    const p=perMap.get(g.id);
+    h+=`<tr data-id="${g.id}" style="${p?'':'opacity:.45'}">
+     <td><input type="checkbox" data-f="inc" ${g.inc?'checked':''}></td>
+     <td><input type="text" data-f="n" value="${g.n.replace(/"/g,'&quot;')}" style="width:140px"></td>
+     <td><input type="text" data-f="cat" value="${g.cat.replace(/"/g,'&quot;')}" style="width:130px"></td>
+     <td><select data-f="c">${CIRCLES.map(c=>`<option ${c===g.c?'selected':''}>${c}</option>`).join('')}</select></td>
+     <td><select data-f="loc">${locOpts(g.loc)}</select></td>
+     <td><input type="checkbox" data-f="isKid" ${g.isKid?'checked':''} title="המוזמן עצמו ילד/ה"></td>
+     <td>${g.isKid?'<span class="mini">—</span>':`<input type="number" data-f="cnt" value="${1+(+g.plus||0)}" min="1" style="width:52px" title="כמה מוזמנים בהזמנה הזאת">${g.plus===1?`<label class="mini" style="display:block;white-space:nowrap"><input type="checkbox" data-f="optc" ${g.pt==='opt'?'checked':''}> +1 לא בטוח</label>`:''}`}</td>
+
+     <td>${g.pt==='fixed'?`<input type="number" data-f="kids" value="${g.kids||0}" min="0" style="width:52px">`:'<span class="mini">—</span>'}</td>
+     <td><select data-f="seg" class="seg-tag">${Object.entries(SEG).map(([k,v])=>`<option value="${k}" ${k===g.seg?'selected':''}>${v}</option>`).join('')}</select></td>
+     <td><input type="checkbox" data-f="cov" ${g.cov?'checked':''} title="מישהו מכסה את עלות הראש"></td>
+     <td><input type="number" data-f="pOv" value="${g.pOv===null||g.pOv===undefined?'':Math.round(g.pOv*100)}" placeholder="מודל" min="0" max="100" style="width:64px"></td>
+     <td><input type="number" data-f="gift" value="${g.gift??''}" placeholder="מודל" style="width:80px"></td>
+     <td class="r">${p?pct(p.pa):'—'}</td><td class="r">${p?n1(p.eA+p.eK):'—'}</td><td class="r">${p?ils(p.eGift):'—'}</td><td class="r">${p?ilsS(contrib(R,p)):'—'}</td>
+     <td><button data-del="${g.id}" title="מחיקה">✕</button></td></tr>`;
+  }
+  $('#gTable').innerHTML=h;
+}
+/* attendance */
+function slider(path,label,min,max,step,f,note=''){
+  const v=get(path);
+  return `<div class="row"><label>${label}${note?`<small>${note}</small>`:''}</label><input type="range" data-k="${path}" min="${min}" max="${max}" step="${step}" value="${v}"><span class="val" data-show="${path}" data-fmt="${f}">${showVal(v,f)}</span></div>`;
+}
+function numIn(path,label,note='',step=1){
+  return `<div class="row"><label>${label}${note?`<small>${note}</small>`:''}</label><input type="number" data-k="${path}" step="${step}" value="${get(path)}"><span></span></div>`;
+}
+function showVal(v,f){v=+v;if(f==='%')return (v*100).toFixed(0)+'%';if(f==='x')return v.toFixed(2);if(f==='₪')return '₪'+fmt(v);if(f==='pp')return '+'+(v*100).toFixed(0)+' נק׳';return fmt(v)}
+function renderControls(){
+  $('#attBase').innerHTML='<b>בסיס לפי מעגל</b>'+CIRCLES.map(c=>slider('att.base.'+c,'מעגל '+c,0,1,.01,'%')).join('');
+  $('#attLoc').innerHTML='<b>מקדם לפי מיקום</b>'+Object.keys(S.att.loc).map(l=>slider('att.loc.'+l,l,0,1,.01,'%')).join('');
+  $('#attOther').innerHTML=slider('att.pPlus','סיכוי שה-+1 מגיע',0,1,.05,'%')+
+     slider('att.sys','אי־ודאות מערכתית בהגעה',0,.15,.01,'pp','סטיית תקן של הזזה משותפת לכל האורחים, בנקודות אחוז');
+  $('#giftSeg').innerHTML=Object.entries(SEG).map(([k,v])=>slider('gift.seg.'+k,v,0,1500,25,'₪')).join('');
+  $('#giftOther').innerHTML=slider('gift.spouse','מקדם בן/בת זוג',0,1,.05,'x','1.0 = זוג נותן פי 2 (כמו שאתם נתתם). ‏0.75 = פי 1.75')+
+     slider('gift.kid','מתנה נוספת לכל ילד',0,300,10,'₪')+
+     slider('gift.noGift','סיכוי שאין מתנה כספית',0,.2,.01,'%')+
+     slider('gift.cv','פיזור אישי (מקדם שונות)',0,.6,.05,'%','כמה כל משק בית סוטה מהממוצע')+
+     slider('gift.sysCv','אי־ודאות מערכתית במתנות',0,.3,.01,'%','כמה כל ההערכות יחד יכולות לטעות')+
+     numIn('gift.coverPP','כיסוי לראש לשורות "מכוסה" (₪)')+
+     `<div class="mini" id="coupleHint"></div>`;
+  // venue
+  $('#venueSel').innerHTML=`<option value="ours" ${S.venue.src==='ours'?'selected':''}>ההצעה שלנו (מדרגות)</option>`+DATA.venues.map((v,i)=>`<option value="${i}" ${S.venue.src==i?'selected':''}>${v.name} · ₪${fmt(v.price)} (${v.tier})</option>`).join('');
+  const vs=S.venue.src;
+  $('#venueBox').innerHTML = vs==='ours'
+    ? numIn('venue.min','התחייבות (מינימום מבוגרים)','משלמים עליהם גם אם לא מגיעים')+numIn('venue.pMin','מחיר לראש (עד המינימום)','₪')+numIn('venue.pExtra','מחיר לכל מבוגר נוסף','₪, מעל ההתחייבות')+slider('venue.reserve','רזרבה (ספייר)',0,.25,.01,'%','כמה מנות מעל ההתחייבות המקום מכין. כל מבוגר בתוך הרזרבה עולה את "המחיר הנוסף"')+numIn('venue.kidPrice','מחיר ילד מתחת לגיל 12','₪, לא נספר במינימום')+numIn('venue.av','תוספות אולם (הגברה/תאורה/הצללה)','₪, אם לא כלול')
+    : (()=>{const v=DATA.venues[vs];return `<div class="callout">${v.name} · ${v.area} · ${v.type}<br>מחיר מתכנון ₪${fmt(v.price)} ×(1+התייקרות) · מינימום ${v.min||'—'} · תוספות AV ₪${fmt(v.av)} · אוכל ${v.food}/5 · סאונד ${v.sound}/5 · רחבה ${v.dance}/5<br><span class="mini">${v.note}</span></div>`+slider('venue.kidPct','ילד, כאחוז ממחיר מנה',0,1,.05,'%')})();
+  // suppliers
+  const tot=k=>S.sup.items.filter(k).reduce((a,x)=>a+(+x.amt||0),0);
+  $('#supBox').innerHTML=S.sup.items.map((x,i)=>{
+    const list=x.cat&&DATA.sup[x.cat]? `<select data-sipick="${i}" style="max-width:100%"><option value="">טעינת מחיר מהרשימה…</option><option value="avg">ממוצע הגיליון · ₪${fmt(AVG[x.cat]*(1+S.sup.uplift))}</option>${DATA.sup[x.cat].map(p=>`<option value="${p.name}">${p.tier} · ${p.name} · ₪${fmt(p.price*(1+S.sup.uplift))}</option>`).join('')}</select>`:'<span></span>';
+    return `<div class="row" style="grid-template-columns:28px minmax(110px,1fr) 104px 110px minmax(120px,1.3fr) 30px;${x.on===false?'opacity:.55':''}">
+      <input type="checkbox" data-si="${i}" data-sif="on" ${x.on!==false?'checked':''} title="כלול בחישוב">
+      <div><input type="text" data-si="${i}" data-sif="name" value="${x.name.replace(/"/g,'&quot;')}" style="width:100%"><small class="mini" style="display:block">${x.src?'מקור: '+x.src:''}</small></div>
+      <select data-si="${i}" data-sif="sure"><option value="1" ${x.sure?'selected':''}>סגור</option><option value="0" ${!x.sure?'selected':''}>לא סגור</option></select>
+      <input type="number" data-si="${i}" data-sif="amt" value="${x.amt}" step="100">
+      ${list}
+      <button data-sidel="${i}" title="מחיקה">✕</button></div>`}).join('')+
+   `<div class="flex" style="margin-top:6px"><button id="bAddSup">+ הוצאה</button><span class="mini right" id="supTot"></span></div>`;
+  $('#upliftBox').innerHTML=slider('sup.uplift','התייקרות ל-2027',0,.15,.01,'%','חלה על מחירים שנטענים מהרשימה ועל מקומות מהגיליון. סכומים שהקלדתם לא משתנים');
+  if(0)$('#extrasBox').innerHTML=S.extras.map((e,i)=>`<div class="row" style="grid-template-columns:1fr 110px 30px"><input type="text" data-ex="${i}" data-exf="name" value="${e.name.replace(/"/g,'&quot;')}"><input type="number" data-ex="${i}" data-exf="amt" value="${e.amt}"><button data-exdel="${i}">✕</button></div>`).join('');
+  $('#contBox').innerHTML=slider('cont','מרווח ביטחון',0,.3,.01,'%');
+  $('#fundBox').innerHTML=numIn('fund.savings','חיסכון עד החתונה','₪')+numIn('fund.parents','עזרת הורים','₪, כרגע 0')+
+     `<div class="row"><label>מספר סימולציות</label><select id="simN">${[1000,2000,4000,8000].map(x=>`<option ${x==S.sim.n?'selected':''}>${x}</option>`).join('')}</select><span></span></div>`;
+  renderFilters();
+}
+function syncShows(){document.querySelectorAll('[data-show]').forEach(el=>el.textContent=showVal(get(el.dataset.show),el.dataset.fmt));
+  const stt=$('#supTot');if(stt){const t=k=>S.sup.items.filter(k).reduce((a,x)=>a+(+x.amt||0),0);stt.innerHTML=`סגורות: <b>₪${fmt(t(x=>x.sure&&x.on!==false))}</b> · לא סגורות שנכללו: <b>₪${fmt(t(x=>!x.sure&&x.on!==false))}</b> · לא נכללו: ₪${fmt(t(x=>x.on===false))}`}
+  const s=S.gift.seg.student, f=S.gift.seg.friend;
+  const ch=$('#coupleHint'); if(ch) ch.innerHTML=`לבדיקה מול הניסיון שלכם: זוג סטודנטים נותן לפי המודל <b>₪${fmt(s*(1+S.gift.spouse))}</b>, וזוג חברים <b>₪${fmt(f*(1+S.gift.spouse))}</b>.`;}
+function renderAttMatrix(){
+  const locs=Object.keys(S.att.loc);
+  let h='<table class="heat"><tr><th>מעגל \\ מיקום</th>'+locs.map(l=>`<th>${l}</th>`).join('')+'</tr>';
+  for(const c of CIRCLES){h+=`<tr><td class="h">${c}</td>`;for(const l of locs){const p=pAttend(S,{c,loc:l});const cnt=S.guests.filter(g=>g.inc&&g.c===c&&g.loc===l).length;
+    const a=clamp(p,0,1);h+=`<td style="background:color-mix(in srgb,var(--pos) ${Math.round(a*70)}%,transparent);${cnt?'':'opacity:.4'}"><b class="num">${Math.round(Math.min(p,.995)*100)}%</b><div class="mini">${cnt} הזמנות</div></td>`}h+='</tr>'}
+  $('#attMatrix').innerHTML=h+'</table>';
+}
+function renderGiftTable(){
+  $('#mcNote').innerHTML=`כרגע ${ils(R.mcAdult)}, ${S.view.costMode==='marginal'?'שולית':'ממוצעת: '+ils(R.avgCost)}`;
+  const segs={};R.per.forEach(p=>{const k=p.g.cov?'cov':p.g.seg;segs[k]=segs[k]||{a:0,k:0,g:0,c:0,n:0};segs[k].a+=p.eA;segs[k].k+=p.eK;segs[k].g+=p.eGift;segs[k].c+=contrib(R,p);segs[k].n++});
+  const cost=S.view.costMode==='marginal'?R.mcAdult:R.avgCost;
+  let h=`<div class="flex" style="margin-bottom:6px"><span class="mini">עלות לחישוב:</span><label class="chip"><input type="radio" name="cm" value="marginal" ${S.view.costMode==='marginal'?'checked':''}>שולית</label><label class="chip"><input type="radio" name="cm" value="avg" ${S.view.costMode==='avg'?'checked':''}>ממוצעת</label></div>`;
+  h+=`<table><tr><th>קבוצה</th><th class="r">הזמנות</th><th class="r">צפי מבוגרים</th><th class="r">מתנה למבוגר</th><th class="r">מול עלות</th><th class="r">תרומה נטו</th></tr>`;
+  for(const [k,s] of Object.entries(segs)){const per=s.g/Math.max(.01,s.a);h+=`<tr><td>${k==='cov'?'מכוסים (אוקראינה)':SEG[k]}</td><td class="r">${s.n}</td><td class="r">${n1(s.a)}</td><td class="r">${ils(per)}</td><td class="r">${per>=cost?'<span class="pos">✔ מכסה</span>':'<span class="neg">✘ לא מכסה</span>'}</td><td class="r">${ilsS(s.c)}</td></tr>`}
+  $('#giftTable').innerHTML=h+'</table>';
+}
+/* scenarios (heavier) */
+let scenT=null;function scheduleScen(){clearTimeout(scenT);scenT=setTimeout(renderScen,60)}
+function clone(){return JSON.parse(JSON.stringify(S))}
+function renderScen(){
+  if(!$('#t-scenarios').classList.contains('on')){scenDirty=true;return}
+  scenDirty=false;
+  const n=1500;
+  // cumulative
+  const cum=[];for(let k=1;k<=5;k++){const cs=CIRCLES.slice(0,k);const r=simulate(S,{n,circles:cs});cum.push({lab:cs.join('+'),e:r.eNet,p10:quant(r.nets,.1),p90:quant(r.nets,.9),a:r.eA+r.eK,pm:r.pAboveMin})}
+  drawCum(cum);
+  $('#cumTable').innerHTML=`<table><tr><th>מוזמנים</th><th class="r">צפי אנשים</th><th class="r">מעל מינימום</th><th class="r">תוצאה צפויה</th><th class="r">תוספת שולית</th></tr>`+cum.map((c,i)=>`<tr><td>${c.lab}</td><td class="r">${n1(c.a)}</td><td class="r">${pct(c.pm)}</td><td class="r">${ilsS(c.e)}</td><td class="r">${i?ilsS(c.e-cum[i-1].e):'—'}</td></tr>`).join('')+'</table><div class="mini">שימו לב: הסינון לפי מעגלים בלשונית "מוזמנים" לא חל כאן. מיקומים ושורות שהוצאו כן מוחרגים.</div>';
+  // tornado
+  const base=simulate(S,{n}).eNet;
+  const T=[
+    ['מתנה ממוצעת ±15%',st=>{for(const k in st.gift.seg)st.gift.seg[k]*=.85},st=>{for(const k in st.gift.seg)st.gift.seg[k]*=1.15}],
+    ['מקדם בן/בת זוג 0.7 / 1.0',st=>st.gift.spouse=.7,st=>st.gift.spouse=1],
+    ['סיכוי +1: ‏30% / 70%',st=>st.att.pPlus=.3,st=>st.att.pPlus=.7],
+    ['הגעה כללית −8 / +5 נק׳',st=>{for(const c in st.att.base)st.att.base[c]-=.08},st=>{for(const c in st.att.base)st.att.base[c]=Math.min(1,st.att.base[c]+.05)}],
+    ['הגעה ממרכז −15 / +5 נק׳',st=>st.att.loc['מרכז']-=.15,st=>st.att.loc['מרכז']=Math.min(1,st.att.loc['מרכז']+.05)],
+    ['מחיר מבוגר נוסף ±30',st=>st.venue.pExtra=+st.venue.pExtra+30,st=>st.venue.pExtra=+st.venue.pExtra-30],
+    ['לא סגורות: אף אחת / כולן',st=>st.sup.items.forEach(x=>{if(!x.sure)x.on=false}),st=>st.sup.items.forEach(x=>{if(!x.sure)x.on=true})],
+    ['ספקים +20% / −20%',st=>st.sup.items.forEach(x=>x.amt*=1.2),st=>st.sup.items.forEach(x=>x.amt*=.8)],
+    ['מרווח ביטחון 20% / 0%',st=>st.cont=.2,st=>st.cont=0],
+  ].map(([l,lo,hi])=>{const a=clone();lo(a);const b=clone();hi(b);return {l,lo:simulate(a,{n}).eNet-base,hi:simulate(b,{n}).eNet-base}}).sort((x,y)=>Math.max(Math.abs(y.lo),Math.abs(y.hi))-Math.max(Math.abs(x.lo),Math.abs(x.hi)));
+  drawTornado(T,base);
+  // venues
+  const VS=['ours',...DATA.venues.map((_,i)=>i)].map(src=>{const r=simulate(S,{n:1000,venue:src});const v=venueOf(S,src);const meta=src==='ours'?null:DATA.venues[src];
+    return {src,name:v.name,price:src==='ours'?`${fmt(v.pMin)}/${fmt(v.pExtra)}`:fmt(v.pMin),min:v.min||'—',av:v.av,ev:r.eVenue,e:r.eNet,p10:quant(r.nets,.1),meta}}).sort((a,b)=>b.e-a.e);
+  const mxe=Math.max(...VS.map(x=>Math.abs(x.e)));
+  $('#venueTable').innerHTML=`<tr><th>מקום</th><th class="r">₪/ראש</th><th class="r">מינ׳</th><th class="r">AV</th><th class="r">עלות מקום צפויה</th><th class="r">תוצאה צפויה</th><th class="r">P10</th><th>אוכל/סאונד/רחבה</th><th></th></tr>`+
+    VS.map(x=>`<tr style="${x.src===S.venue.src||x.src==S.venue.src?'background:var(--surface2)':''}"><td>${x.src==='ours'?'<b>ההצעה שלנו</b>':x.name}${x.meta&&x.meta.tier==='—'?' <span class="pill">לא מומלץ</span>':''}</td><td class="r">${x.price}</td><td class="r">${x.min}</td><td class="r">${fmt(x.av)}</td><td class="r">${ils(x.ev)}</td><td class="r">${ilsS(x.e)}</td><td class="r">${ilsS(x.p10)}</td><td>${x.meta?`${x.meta.food}/${x.meta.sound}/${x.meta.dance}`:'—'}</td><td><button data-pickv="${x.src}">בחר</button></td></tr>`).join('');
+  // breakeven
+  const cost=R.eVenue+R.fc.total; const need=cost-R.eCover-(+S.fund.parents)-(+S.fund.savings); const giftsNC=R.eGift-R.eCover; const mult=need/giftsNC;
+  const adultsNC=R.per.filter(p=>!p.g.cov).reduce((a,p)=>a+p.eA,0);
+  $('#breakeven').innerHTML=`<h2>נקודת איזון</h2>
+   <div class="callout">כדי לסיים ב-0 (כולל החיסכון), כל המתנות צריכות להיות גבוהות פי <b class="num">${mult.toFixed(2)}</b> מההערכה הנוכחית. כלומר בממוצע <b>${ils(need/adultsNC)}</b> למבוגר במקום <b>${ils(giftsNC/adultsNC)}</b>.</div>
+   <div class="callout">בלי החיסכון (${ils(+S.fund.savings)}) היה צריך ממוצע של <b>${ils((need+(+S.fund.savings))/adultsNC)}</b> למבוגר.</div>
+   <div class="callout">העלות הקבועה (ספקים, הוצאות נוספות וביטחון) היא ${ils(R.fc.total)}. אותו סכום בדיוק יוצא בכל כמות אורחים, ולכן <b>קיצוץ אורחים לא מוריד אותה</b>. יש שתי דרכים להוריד את ההפסד: לחסוך בספקים או במחיר המנה, או לוודא שכל אורח "מכסה את המנה".</div>`;
+}
+let scenDirty=true;
+function drawCum(c){
+  const el=$('#cumChart');const W=el.clientWidth||700,H=230,m={l:56,r:16,t:14,b:30};
+  const lo=Math.min(0,...c.map(x=>x.p10)),hi=Math.max(0,...c.map(x=>x.p90));
+  const X=i=>m.l+(i+.5)*(W-m.l-m.r)/c.length, Y=v=>m.t+(hi-v)/(hi-lo||1)*(H-m.t-m.b);
+  let s=`<svg width="${W}" height="${H}" style="direction:ltr;display:block">`;
+  for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4;s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke-dasharray="2,3"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${kfmt(v)}</text>`}
+  s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  c.forEach((x,i)=>{const col=x.e<0?'var(--neg)':'var(--pos)';s+=`<line x1="${X(i)}" x2="${X(i)}" y1="${Y(x.p10)}" y2="${Y(x.p90)}" stroke="${col}" stroke-width="2"/><circle cx="${X(i)}" cy="${Y(x.e)}" r="6" fill="${col}" stroke="var(--surface)" stroke-width="2"/><text x="${X(i)}" y="${H-10}" text-anchor="middle">${x.lab}</text><text x="${X(i)+10}" y="${Y(x.e)+4}" style="fill:var(--text)">${kfmt(x.e)}</text>
+   <rect x="${X(i)-30}" y="${m.t}" width="60" height="${H-m.t-m.b}" fill="transparent" data-tip="<b>${x.lab}</b><br>צפוי: ${kfmt(x.e)}<br>P10 ${kfmt(x.p10)} · P90 ${kfmt(x.p90)}<br>${x.a.toFixed(0)} אנשים"/>`});
+  el.innerHTML=s+'</svg>';bindTips(el);
+}
+function drawTornado(T,base){
+  const el=$('#tornado');
+  const mx=Math.max(1,...T.flatMap(t=>[Math.abs(t.lo),Math.abs(t.hi)]));
+  let s=`<div class="mini" style="margin-bottom:6px">בסיס: ${ils(base)} · אדום = התוצאה יורדת, כחול = עולה · ריחוף על פס מראה את הסכום</div>`;
+  T.forEach(t=>{
+    const bar=(v,k)=>{const w=Math.abs(v)/mx*50;const side=v<0?`right:50%`:`left:50%`;
+      return `<div data-tip="${t.l}<br>${k}: ${v<0?'−':'+'}₪${fmt(Math.abs(v))}" style="position:absolute;top:3px;bottom:3px;${side};width:${Math.max(.3,w)}%;background:${v<0?'var(--neg)':'var(--pos)'};border-radius:3px"></div>`};
+    s+=`<div style="display:grid;grid-template-columns:190px 1fr 70px;gap:8px;align-items:center;margin:3px 0;font-size:13px">
+      <span>${t.l}</span>
+      <div style="position:relative;height:22px;direction:ltr"><div style="position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--muted)"></div>${bar(t.lo,'ערך ראשון')}${bar(t.hi,'ערך שני')}</div>
+      <span class="r mini">±${kfmt(Math.max(Math.abs(t.lo),Math.abs(t.hi)))}</span></div>`});
+  el.innerHTML=s;bindTips(el);
+}
+
+/* ---------- events ---------- */
+let T0=null;function changed(full){save();clearTimeout(T0);T0=setTimeout(()=>{if(full)renderControls();syncShows();compute()},120)}
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.k){set(t.dataset.k, t.type==='range'||t.type==='number'? +t.value : t.value);syncShows();changed();return}
+  if(t.dataset.si!==undefined&&(t.dataset.sif==='amt'||t.dataset.sif==='name')){const x=S.sup.items[+t.dataset.si];if(t.dataset.sif==='amt'){x.amt=+t.value;x.src='ידני'}else x.name=t.value;syncShows();changed();return}
+  if(t.dataset.ex!==undefined){S.extras[+t.dataset.ex][t.dataset.exf]=t.dataset.exf==='amt'?+t.value:t.value;changed();return}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.fc){S.filt.c[t.dataset.fc]=t.checked;changed();return}
+  if(t.dataset.fl){S.filt.l[t.dataset.fl]=t.checked;changed();return}
+  if(t.dataset.si!==undefined&&t.dataset.sif==='on'){S.sup.items[+t.dataset.si].on=t.checked;changed(true);return}
+  if(t.dataset.si!==undefined&&t.dataset.sif==='sure'){S.sup.items[+t.dataset.si].sure=t.value==='1';changed(true);return}
+  if(t.dataset.si!==undefined&&t.dataset.sif!=='amt'&&t.dataset.sif!=='name')return;
+  if(t.dataset.sipick!==undefined&&t.value){const x=S.sup.items[+t.dataset.sipick];const v=t.value;
+    if(v==='avg'){x.amt=Math.round(AVG[x.cat]*(1+S.sup.uplift));x.src='ממוצע הגיליון'}
+    else if(v==='none'){x.amt=0;x.src='כלול במקום'}
+    else{const p=DATA.sup[x.cat].find(q=>q.name===v);x.amt=Math.round(p.price*(1+S.sup.uplift));x.src=p.name+' ('+p.tier+')'}
+    changed(true);return}
+  if(t.id==='venueSel'){S.venue.src=t.value==='ours'?'ours':+t.value;changed(true);return}
+  if(t.id==='simN'){S.sim.n=+t.value;changed();return}
+  if(t.name==='cm'){S.view.costMode=t.value;changed();return}
+  const tr=t.closest('tr[data-id]');
+  if(tr&&t.dataset.f){const g=S.guests.find(x=>x.id==tr.dataset.id);const f=t.dataset.f;
+    if(t.type==='checkbox'&&f!=='optc'){g[f]=t.checked;if(f==='isKid'&&t.checked){g.pt='none';g.plus=0;g.kids=0;}}
+    else if(f==='plus'||f==='kids')g[f]=Math.max(0,+t.value||0);
+    else if(f==='gift')g[f]=t.value===''?null:+t.value;
+    else if(f==='pOv')g[f]=t.value===''?null:clamp(+t.value/100,0,1);
+    else if(f==='cnt'){const n=Math.max(1,Math.round(+t.value||1));const wasOpt=g.pt==='opt';g.plus=n-1;if(n===1){g.pt='none';g.kids=0}else if(n===2){g.pt=wasOpt?'opt':'fixed'}else g.pt='fixed';if(g.pt!=='fixed')g.kids=0;}
+    else if(f==='optc'){g.pt=t.checked?'opt':'fixed';if(g.pt==='opt')g.kids=0;}
+    else if(f==='pt'){g.pt=t.value;if(t.value==='none'){g.plus=0;g.kids=0}if(t.value==='opt'){g.plus=1;g.kids=0}if(t.value==='fixed'&&g.plus<1)g.plus=2}
+    else g[f]=t.value;
+    if(g.kids>g.plus)g.kids=g.plus;
+    changed();}
+});
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.dataset.preset){const pr=t.dataset.preset;for(const x of S.sup.items){if(!x.cat)continue;
+      if(pr==='avg'){x.amt=Math.round(AVG[x.cat]*(1+S.sup.uplift));x.src='ממוצע הגיליון'}
+      else{const p=DATA.sup[x.cat].find(q=>q.name===PRESET[pr][x.cat]);x.amt=Math.round(p.price*(1+S.sup.uplift));x.src=p.name+' ('+p.tier+')'}}
+    changed(true);return}
+  if(t.dataset.revert){revertPath(S,t.dataset.revert);changed(true);return}
+  if(t.dataset.sidel!==undefined){S.sup.items.splice(+t.dataset.sidel,1);changed(true);return}
+  if(t.id==='bAddSup'){S.sup.items.push({cat:null,name:'הוצאה חדשה',amt:0,src:'ידני',on:true,sure:false});changed(true);return}
+  if(t.dataset.del){S.guests=S.guests.filter(g=>g.id!=t.dataset.del);changed();return}
+  if(t.dataset.exdel!==undefined){S.extras.splice(+t.dataset.exdel,1);changed(true);return}
+  if(t.dataset.pickv!==undefined){S.venue.src=t.dataset.pickv==='ours'?'ours':+t.dataset.pickv;changed(true);return}
+  if(t.dataset.sort){const k=t.dataset.sort;if(S.view.sortK===k)S.view.sortDir*=-1;else{S.view.sortK=k;S.view.sortDir=1}renderGuests();save();return}
+  if(t.id==='bAdd'){const id=Math.max(0,...S.guests.map(g=>g.id))+1;S.guests.unshift({id,n:'הזמנה חדשה',cat:'חברים',c:'B',loc:'צפון',plus:0,pt:'none',kids:0,seg:'friend',cov:false,inc:true,gift:null});$('#gSearch').value='';changed();return}
+});
+$('#gSearch').addEventListener('input',()=>renderGuests());
+/* export / import / reset */
+const modal=$('#modal');
+function openModal(title,hint,text,go,goLabel,file){$('#mTitle').textContent=title;$('#mHint').textContent=hint;$('#mText').value=text;$('#mGo').textContent=goLabel;$('#mGo').onclick=go;$('#mMsg').textContent='';$('#mFileBtn').style.display=file?'':'none';modal.classList.add('on')}
+$('#mClose').onclick=()=>modal.classList.remove('on');
+$('#mFileBtn').onclick=()=>$('#mFile').click();
+$('#mFile').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{$('#mText').value=t})};
+async function copyText(){try{await navigator.clipboard.writeText($('#mText').value);$('#mMsg').textContent='הועתק ✔'}catch(e){$('#mText').select();$('#mMsg').textContent='סמנו והעתיקו ידנית (Ctrl+C)'}}
+$('#bExport').onclick=()=>openModal('ייצוא / גיבוי','העתיקו ושמרו בקובץ או בפתק. אפשר לטעון את זה מחדש דרך "ייבוא", גם במכשיר אחר.',JSON.stringify(S),copyText,'העתקה');
+$('#bCsv').onclick=()=>{const head='שם,קטגוריה,מעגל,מיקום,ילד,סוג פלוס,פלוס,ילדים,קבוצת מתנה,מכוסה,כלול,מתנה ידנית,סיכוי הגעה,צפי אנשים,מתנה צפויה';const pm=new Map(R.per.map(p=>[p.g.id,p]));
+  const rows=S.guests.map(g=>{const p=pm.get(g.id);return [g.n,g.cat,g.c,g.loc,g.isKid?1:0,g.pt,g.plus,g.kids||0,SEG[g.seg],g.cov?1:0,g.inc?1:0,g.gift??'',p?p.pa.toFixed(2):'',p?(p.eA+p.eK).toFixed(2):'',p?Math.round(p.eGift):''].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')});
+  openModal('רשימת מוזמנים (CSV)','העתיקו והדביקו ב-Google Sheets (הדבקה בתא A1).',head+'\n'+rows.join('\n'),copyText,'העתקה')};
+$('#bImport').onclick=()=>openModal('ייבוא','הדביקו גיבוי שייצאתם קודם (JSON), או טענו קובץ.','',()=>{try{const o=JSON.parse($('#mText').value);S=loadState(o);save();renderControls();syncShows();compute();modal.classList.remove('on')}catch(e){$('#mMsg').textContent='לא הצלחתי לקרוא את הטקסט'}},'טעינה',true);
+let resetArm=false;$('#bReset').onclick=e=>{if(!resetArm){resetArm=true;e.target.textContent='בטוח? לחצו שוב';setTimeout(()=>{resetArm=false;e.target.textContent='איפוס לברירות מחדל'},3000);return}S=SITE? merge(DEF(),{guests:S.guests,sup:S.sup,extras:S.extras,fund:S.fund,venue:S.venue}) : DEF();save();renderControls();syncShows();compute();e.target.textContent=SITE?'איפוס הנחות המודל':'איפוס לברירות מחדל';resetArm=false};
+/* routing */
+function route(){const h=(location.hash||'#overview').slice(1);const ok=['overview','guests','attendance','gifts','costs','scenarios','model'].includes(h)?h:'overview';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='t-'+ok));document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+ok));
+  if(R){ if(ok==='overview')renderOverview(); if(ok==='scenarios'&&scenDirty)renderScen(); }}
+addEventListener('hashchange',route);
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{renderOverview();scenDirty=true;route()},200)});
+renderControls();syncShows();route();compute();
+</script>
+<div class="modal on" id="gate"><div class="box" style="max-width:420px;text-align:center">
+  <h2 style="margin-top:0">חתונה — מודל כלכלי</h2>
+  <p class="hint" id="gateMsg">כניסה עם חשבון גוגל. רק חשבונות מורשים יכולים לראות ולערוך.</p>
+  <button class="primary" id="gLogin" style="font-size:15px;padding:9px 16px">כניסה עם גוגל</button>
+</div></div>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getFirestore,doc,onSnapshot,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const cfg={"apiKey":"AIzaSyD0vcQw25gS3GueSijSOJ5XM3SpRrfkmZU","authDomain":"wedding-planner-3c8dc.firebaseapp.com","projectId":"wedding-planner-3c8dc","storageBucket":"wedding-planner-3c8dc.firebasestorage.app","messagingSenderId":"1034731607932","appId":"1:1034731607932:web:494cf82342f976ada376f9"};
+const q=s=>document.querySelector(s);
+const gate=q('#gate'),gmsg=q('#gateMsg'),st=q('#saveState'),out=q('#bLogout');
+const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+const ref=doc(db,'weddings','main');
+let unsub=null,timer=null,lastSent=null,pending=null;
+window.CLOUD={ready:false,push(json){
+  if(json===lastSent)return; clearTimeout(timer); st.textContent='שומר…';
+  timer=setTimeout(async()=>{try{await setDoc(ref,{state:json,updatedAt:serverTimestamp(),by:auth.currentUser.email});lastSent=json;st.textContent='נשמר בענן ✓';}
+    catch(e){st.textContent='שגיאה בשמירה ('+(e.code||e.message)+')';}},700);}};
+getRedirectResult(auth).catch(e=>{gmsg.textContent='הכניסה נכשלה: '+(e.code||e.message)});
+q('#gLogin').onclick=async()=>{const p=new GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
+  try{await signInWithPopup(auth,p)}catch(e){
+    if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'].includes(e.code)) signInWithRedirect(auth,p);
+    else if(e.code!=='auth/popup-closed-by-user') gmsg.textContent='הכניסה נכשלה: '+e.code;}};
+out.onclick=()=>signOut(auth);
+function apply(json){const a=document.activeElement;
+  if(a&&a.matches&&a.matches('main input,main select,main textarea')){pending=json;a.addEventListener('blur',()=>{if(pending){const j=pending;pending=null;window.applyRemoteState(j)}},{once:true});return}
+  window.applyRemoteState(json);}
+onAuthStateChanged(auth,u=>{
+  if(unsub){unsub();unsub=null} window.CLOUD.ready=false;
+  if(!u){gate.classList.add('on');out.style.display='none';return}
+  gate.classList.remove('on');out.style.display='';out.textContent='יציאה ('+u.email.split('@')[0]+')';st.textContent='טוען נתונים…';
+  unsub=onSnapshot(ref,snap=>{
+    if(snap.metadata.hasPendingWrites)return;
+    window.CLOUD.ready=true;
+    if(!snap.exists()){st.textContent='אין עדיין נתונים בענן. לחצו "ייבוא" והדביקו את הגיבוי.';q('#bImport').click();return}
+    const d=snap.data();lastSent=d.state;apply(d.state);
+    st.textContent='מסונכרן ✓'+(d.by?' · עודכן לאחרונה ע״י '+d.by.split('@')[0]:'');
+  },e=>{ if(e.code==='permission-denied'){gate.classList.add('on');gmsg.textContent='החשבון '+u.email+' לא מורשה. נסו חשבון אחר.';signOut(auth);} else st.textContent='אין גישה לנתונים ('+e.code+')';});
+});
+</script>
+
+</body>
+</html>
