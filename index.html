@@ -83,6 +83,41 @@ svg text{fill:var(--text2);font-family:Heebo,sans-serif;font-size:11px}
 svg .ax{stroke:var(--line)}
 .tip{position:fixed;pointer-events:none;background:var(--text);color:var(--surface);font-size:12.5px;padding:6px 9px;border-radius:6px;z-index:50;display:none;max-width:260px;line-height:1.35}
 .tab{display:none}.tab.on{display:block}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:6px 0;cursor:pointer}
+.gcard .gc1{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.gcard .gc2{margin-top:3px}
+.gform .fe{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+.gform .fe input[type=text],.gform .fe select,.gform .fe input[type=number]{width:55%;font-size:16px}
+.gform .fe input[type=checkbox]{width:22px;height:22px}
+@media (max-width:760px){
+  body{font-size:14.5px}
+  header{padding:12px 10px 0} h1{font-size:19px}
+  main{padding:10px 8px 70px}
+  .kpis{grid-template-columns:1fr 1fr;gap:6px}
+  .kpi{padding:8px 9px} .kpi .v{font-size:17px} .kpi .s{font-size:11px}
+  .card{padding:11px;border-radius:10px}
+  .row{grid-template-columns:1fr 70px;gap:4px 8px}
+  .row>label{grid-column:1/-1}
+  .row input[type=range]{grid-column:1/2}
+  .row input[type=number]{width:100%}
+  input,select,button{font-size:16px}
+  #supBox>.row{display:flex !important;flex-wrap:wrap;gap:6px;align-items:flex-end}
+  #supBox>.row>*{order:3}
+  #supBox>.row>input[type=checkbox]{order:0}
+  #supBox>.row>div{order:1;flex:1 1 calc(100% - 90px)}
+  #supBox>.row>button[data-sidel]{order:2;flex:0 0 auto}
+  #supBox>.row>select{flex:0 0 96px}
+  #supBox>.row>label{flex:1 1 0;min-width:0;grid-column:auto}
+  #supBox>.row>button[data-sopen]{flex:0 0 auto;font-size:13px;padding:6px 7px}
+  body:not([data-tab="overview"]) .kpi:nth-child(n+3){display:none}
+  .ups{margin-right:8px}
+  .bars .b{grid-template-columns:105px 1fr 78px;font-size:12.5px}
+  table{font-size:12.5px} th,td{padding:5px 4px}
+  .countdown .cd{min-width:60px;padding:5px 9px} .countdown .cd b{font-size:19px}
+  .toolbar button{font-size:13px;padding:5px 8px}
+  .modal .box{padding:12px;max-height:92vh}
+  .heat td{font-size:11.5px}
+}
 .countdown{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .countdown .cd{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 12px;text-align:center;min-width:70px}
 .countdown .cd b{display:block;font-size:22px;line-height:1.1}
@@ -168,7 +203,7 @@ details summary{cursor:pointer;color:var(--text2);font-size:13.5px}
         <span class="mini" id="gCount"></span>
         <button class="right" id="bAdd">+ הוספת הזמנה</button></div>
       <p class="hint" style="margin-top:6px">כל שורה היא <b>הזמנה</b> (משק בית). <b>מוזמנים</b> = כמה אנשים בהזמנה (כמו "סה״כ מוזמנים" בגיליון). כשיש בהזמנה 2, אפשר לסמן <b>"+1 לא בטוח"</b>, ואז השני נספר בהסתברות שבחרתם בלשונית מודל הגעה. "תרומה נטו" = מתנה צפויה פחות העלות השולית שהשורה מוסיפה. <b>ילד/ה</b> = המוזמן עצמו ילד/ה (נספר בחצי מנה, מתנה = "מתנה נוספת לכל ילד"). ההורים של תומר מסומנים "מתנה ידנית 0".</p>
-      <div class="tw"><table id="gTable"></table></div>
+      <div class="tw" id="gTableWrap"><table id="gTable"></table></div><div id="gCards"></div>
     </div>
   </section>
 
@@ -284,6 +319,7 @@ details summary{cursor:pointer;color:var(--text2);font-size:13.5px}
 </main>
 
 <div class="tip" id="tip"></div>
+<div class="modal" id="gEdit"><div class="box" id="gEditBox"></div></div>
 <div class="modal" id="modal"><div class="box">
   <h2 id="mTitle" style="margin-top:0"></h2>
   <p class="hint" id="mHint"></p>
@@ -328,12 +364,12 @@ function DEF(){
     extras:[], cont:.10,
     fund:{savings:SITE?0:15000, parents:0},
     filt:{c:{S:true,A:true,B:true,C:true,D:true}, l:{}},
-    sim:{n:4000, seed:7}, ver:12,
+    sim:{n:2000, seed:7}, ver:13,
     view:{costMode:'marginal', sortK:null, sortDir:1}
   };
 }
 let S;
-function loadState(o){ if(!o.ver||o.ver<2){ if(o.gift) o.gift.spouse=1; o.ver=2; } if(o.ver<3){ migrate3(o); o.ver=3; } if(o.ver<4){ migrate4(o); o.ver=4; } if(o.ver<5){ o.ver=5; } if(o.ver<6){ (o.guests||[]).forEach(g=>{ if(g.cat==='משפחה יוליה אוקראינה') g.cov=false; }); o.ver=6; } if(o.ver<7){ if(o.bus) o.bus.on=false; o.ver=7; } if(o.ver<8){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){g.pOv=.6;g.gift=450;g.cov=false}}); o.ver=8; } if(o.ver<9){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){if(g.pOv===.6)g.pOv=null;if(g.gift===450)g.gift=null;}});if(o.att&&o.att.loc&&o.att.loc['אוקראינה']===.35)o.att.loc['אוקראינה']=.68; o.ver=9; } if(o.ver<10){ migrate10(o); o.ver=10; } if(o.ver<11){ migrate11(o); o.ver=11; }  if((o.ver||0)<12){ migrate12(o); } o.ver=Math.max(o.ver||0,12); return merge(DEF(),o); }
+function loadState(o){ if(!o.ver||o.ver<2){ if(o.gift) o.gift.spouse=1; o.ver=2; } if(o.ver<3){ migrate3(o); o.ver=3; } if(o.ver<4){ migrate4(o); o.ver=4; } if(o.ver<5){ o.ver=5; } if(o.ver<6){ (o.guests||[]).forEach(g=>{ if(g.cat==='משפחה יוליה אוקראינה') g.cov=false; }); o.ver=6; } if(o.ver<7){ if(o.bus) o.bus.on=false; o.ver=7; } if(o.ver<8){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){g.pOv=.6;g.gift=450;g.cov=false}}); o.ver=8; } if(o.ver<9){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){if(g.pOv===.6)g.pOv=null;if(g.gift===450)g.gift=null;}});if(o.att&&o.att.loc&&o.att.loc['אוקראינה']===.35)o.att.loc['אוקראינה']=.68; o.ver=9; } if(o.ver<10){ migrate10(o); o.ver=10; } if(o.ver<11){ migrate11(o); o.ver=11; }  if((o.ver||0)<12){ migrate12(o); } if((o.ver||0)<13){ if(o.sim&&o.sim.n>=4000)o.sim.n=2000; } o.ver=Math.max(o.ver||0,13); return merge(DEF(),o); }
 try{ const raw=localStorage.getItem(KEY); S = raw? loadState(JSON.parse(raw)) : DEF(); }catch(e){ S=DEF(); }
 function migrate3(o){}
 function oldSupPrice(o,c){const sel=o.sup.sel?.[c]??'avg',up=o.sup.uplift??.05;
@@ -395,46 +431,59 @@ function giftMean(st,g,adults,kids){
   const per=st.gift.seg[g.seg]??450;
   return per*(1+st.gift.spouse*(adults-1)) + st.gift.kid*kids;
 }
+/* random table shared by all simulations (common random numbers, computed once) */
+let RT=null; const COL=new Map();
+function colOf(g){ let c=COL.get(g.id); if(c===undefined){ c=COL.size; COL.set(g.id,c); } return c; }
+function rtable(n,seed){
+  const need=Math.max(COL.size+16,160);
+  if(RT&&RT.seed===seed&&RT.n>=n&&RT.g>=COL.size) return RT;
+  const N=Math.max(n,RT&&RT.seed===seed?RT.n:0), GG=Math.max(need,RT&&RT.seed===seed?RT.g:0);
+  const rnd=mulberry32(seed); let spare=null;
+  const gauss=()=>{ if(spare!==null){const s=spare;spare=null;return s} const u=rnd()||1e-9,w=rnd(),r=Math.sqrt(-2*Math.log(u)); spare=r*Math.sin(2*Math.PI*w); return r*Math.cos(2*Math.PI*w); };
+  const M=N*GG, u1=new Float32Array(M),u2=new Float32Array(M),u3=new Float32Array(M),z=new Float32Array(M),e1=new Float32Array(N),e2=new Float32Array(N);
+  for(let r=0;r<N;r++){ e1[r]=gauss(); e2[r]=gauss(); }
+  for(let k=0;k<M;k++){ u1[k]=rnd(); u2[k]=rnd(); u3[k]=rnd(); z[k]=gauss(); }
+  RT={seed,n:N,g:GG,u1,u2,u3,z,e1,e2}; return RT;
+}
 function simulate(st,opt={}){
-  const n=opt.n||st.sim.n, rnd=mulberry32(opt.seed||st.sim.seed);
+  const n=opt.n||st.sim.n;
   const G=opt.guests||activeGuests(st,opt.circles);
   const v=venueOf(st,opt.venue);
   const fc=fixedCosts(st);
   const sg=Math.sqrt(Math.log(1+st.gift.cv**2)), sysg=Math.sqrt(Math.log(1+st.gift.sysCv**2));
-  const gauss=()=>{let u=rnd()||1e-9,w=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*w)};
-  const P=G.map(g=>pAttend(st,g));
-  const per=opt.per? G.map(()=>({a:0,k:0,gift:0,att:0})):null;
-  const nets=new Float64Array(n),As=new Float64Array(n),Ks=new Float64Array(n),gifts=new Float64Array(n),venues=new Float64Array(n),centers=new Float64Array(n);
-  let coverSum=0;
+  const L=G.length, P=new Float64Array(L), C=new Int32Array(L), KI=new Float64Array(L), AB=new Float64Array(L), OPT=new Uint8Array(L), COV=new Uint8Array(L), M1=new Float64Array(L), M2=new Float64Array(L);
+  for(let i=0;i<L;i++){const g=G[i]; P[i]=pAttend(st,g); C[i]=colOf(g);
+    const kids=g.isKid?1:Math.min(g.kids||0,g.pt==='fixed'?g.plus:0); KI[i]=kids;
+    const ab=g.isKid?0:1+(g.pt==='fixed'?g.plus-kids:0); AB[i]=ab; OPT[i]=(!g.isKid&&g.pt==='opt')?1:0; COV[i]=g.cov?1:0;
+    M1[i]=giftMean(st,g,ab,kids); M2[i]=OPT[i]?giftMean(st,g,ab+1,kids):M1[i]; }
+  const T=rtable(n,st.sim.seed), GG=T.g, pPlus=st.att.pPlus, noGift=st.gift.noGift, sys=st.att.sys, half=sg*sg/2, halfS=sysg*sysg/2;
+  const pa=opt.per?new Float64Array(L):null, pk=opt.per?new Float64Array(L):null, pg=opt.per?new Float64Array(L):null;
+  const nets=new Array(n),As=new Array(n),Ks=new Array(n),gifts=new Array(n),venues=new Array(n);
+  const extra=(+st.fund.parents)+(+st.fund.savings)-fc.total;
+  let coverSum=0,sN=0,sA=0,sK=0,sG=0,sV=0,above=0,over=0,sExtra=0;
+  const cap = v.reserve===null? Infinity : Math.round(v.min*(1+v.reserve));
   for(let r=0;r<n;r++){
-    const eps=gauss()*st.att.sys, gm=Math.exp(gauss()*sysg-sysg*sysg/2);
-    let A=0,K=0,gift=0,cen=0,cov=0;
-    for(let i=0;i<G.length;i++){
-      const g=G[i];
-      const u1=rnd(),u2=rnd(),u3=rnd(),z=gauss();
-      if(u1 >= clamp(P[i]+eps,0,.995)) continue;
-      const kids=g.isKid? 1 : Math.min(g.kids||0, g.pt==='fixed'? g.plus:0);
-      let adults=g.isKid? 0 : 1+(g.pt==='fixed'? g.plus-kids:0)+((g.pt==='opt'&&u2<st.att.pPlus)?1:0);
-      let m=giftMean(st,g,adults,kids), gv;
-      if(g.cov){ gv=m; cov+=m; }
-      else { gv = u3<st.gift.noGift? 0 : m*Math.exp(z*sg-sg*sg/2)*gm; }
-      A+=adults;K+=kids;gift+=gv; if(isCenter(g.loc)) cen+=adults+kids;
-      if(per){per[i].a+=adults;per[i].k+=kids;per[i].gift+=gv;per[i].att++;}
+    const eps=T.e1[r]*sys, gm=Math.exp(T.e2[r]*sysg-halfS), base=r*GG;
+    let A=0,K=0,gift=0,cov=0;
+    for(let i=0;i<L;i++){
+      const idx=base+C[i]; let p=P[i]+eps; if(p>.995)p=.995;
+      if(T.u1[idx]>=p) continue;
+      const plus=OPT[i]&&T.u2[idx]<pPlus;
+      const adults=AB[i]+(plus?1:0), kids=KI[i], m=plus?M2[i]:M1[i];
+      let gv; if(COV[i]){gv=m;cov+=m}else gv=T.u3[idx]<noGift?0:m*Math.exp(T.z[idx]*sg-half)*gm;
+      A+=adults;K+=kids;gift+=gv;
+      if(pa){pa[i]+=adults;pk[i]+=kids;pg[i]+=gv}
     }
-    const vc=venueCost(v,A,K);
-    As[r]=A;Ks[r]=K;gifts[r]=gift;venues[r]=vc;centers[r]=cen;coverSum+=cov;
-    nets[r]=gift+(+st.fund.parents)+(+st.fund.savings)-vc-fc.total;
+    const vc=venueCost(v,A,K), net=gift+extra-vc;
+    As[r]=A;Ks[r]=K;gifts[r]=gift;venues[r]=vc;nets[r]=net;coverSum+=cov;
+    sN+=net;sA+=A;sK+=K;sG+=gift;sV+=vc; if(A>=v.min)above++; if(A>cap)over++; sExtra+=Math.max(0,A-v.min);
   }
-  const res={n,G,v,fc,nets:[...nets],As:[...As],Ks:[...Ks],gifts:[...gifts],venues:[...venues],
-    eNet:mean(nets),eA:mean(As),eK:mean(Ks),eGift:mean(gifts),eVenue:mean(venues),eCenter:mean(centers),eCover:coverSum/n};
-  res.pAboveMin = As.filter(a=>a>=v.min).length/n;
-  res.cap = v.reserve===null? Infinity : Math.round(v.min*(1+v.reserve));
-  res.pOver = As.filter(a=>a>res.cap).length/n;
-  res.eExtraAdults = mean(As.map(a=>Math.max(0,a-v.min)));
-  res.mcAdult = v.tiered? v.pExtra*res.pAboveMin : v.pMin*(As.filter(a=>a>=v.min).length/n);
+  const res={n,G,v,fc,nets,As,Ks,gifts,venues,eNet:sN/n,eA:sA/n,eK:sK/n,eGift:sG/n,eVenue:sV/n,eCenter:0,eCover:coverSum/n};
+  res.pAboveMin=above/n; res.cap=cap; res.pOver=over/n; res.eExtraAdults=sExtra/n;
+  res.mcAdult = v.tiered? v.pExtra*res.pAboveMin : v.pMin*res.pAboveMin;
   res.kidCost = v.kidPrice;
   res.avgCost = (res.eVenue+fc.total)/(res.eA+res.eK*v.kidPrice/v.pMin);
-  if(per){ res.per=per.map((p,i)=>({g:G[i],pa:P[i],eA:p.a/n,eK:p.k/n,eGift:p.gift/n})); }
+  if(pa){ res.per=G.map((g,i)=>({g,pa:Math.min(P[i],.995),eA:pa[i]/n,eK:pk[i]/n,eGift:pg[i]/n})); }
   return res;
 }
 function contrib(R,p){ // net contribution of one row
@@ -470,9 +519,13 @@ const kfmt=v=>(v<0?'−':'')+'₪'+(Math.abs(v)>=1000? (Math.abs(v)/1000).toFixe
 let R=null;
 function compute(){
   R=simulate(S,{per:true});
-  renderKPIs();renderOverview();renderGuests();renderAttMatrix();renderGiftTable();
-  scheduleScen();
+  renderKPIs();renderVisible();
 }
+function curTab(){const h=(location.hash||'#overview').slice(1);return ['overview','guests','attendance','gifts','costs','scenarios','model'].includes(h)?h:'overview'}
+function renderVisible(){const t=curTab();
+  if(t==='overview')renderOverview(); else if(t==='guests'){renderGuests();if($('#gEdit').classList.contains('on'))renderGEdit();}
+  else if(t==='attendance')renderAttMatrix(); else if(t==='gifts')renderGiftTable(); else if(t==='costs')renderPay();
+  scenDirty=true; if(t==='scenarios')scheduleScen();}
 function renderKPIs(){
   const nets=R.nets, p10=quant(nets,.1),p50=quant(nets,.5),p90=quant(nets,.9);
   const fund=+S.fund.savings+(+S.fund.parents);
@@ -534,7 +587,7 @@ function renderOverview(){
   ins+='<div id="reachBox"></div>';
   $('#insights').innerHTML=ins;
   scheduleDiff();
-  clearTimeout(window._rt);window._rt=setTimeout(renderReach,400);
+  clearTimeout(window._rt);window._rt=setTimeout(()=>{if(curTab()==='overview')renderReach()},900);
 }
 /* ---------- payments & countdown ---------- */
 function renderPay(){const el=$('#payCard');if(!el)return;
@@ -585,7 +638,7 @@ function guestChanges(a,b){const F=['n','cat','c','loc','plus','pt','kids','seg'
 function revertPath(st,p){const D=DEF();const ks=p.split('.');let o=st,d=D;
   for(let i=0;i<ks.length-1;i++){o=o[ks[i]];d=d?.[ks[i]]}
   const k=ks.at(-1);const v=d?.[k];if(v===undefined)delete o[k];else o[k]=JSON.parse(JSON.stringify(v));}
-let diffT=null;function scheduleDiff(){clearTimeout(diffT);diffT=setTimeout(renderDiff,250)}
+let diffT=null;function scheduleDiff(){clearTimeout(diffT);diffT=setTimeout(()=>{if(curTab()==='overview')renderDiff()},700)}
 function renderDiff(){const el=$('#diffCard');const ds=findDiffs();
   if(!ds.length){el.style.display='none';return}
   const n=1500,base=simulate(S,{n}).eNet;
@@ -654,8 +707,38 @@ function renderGuests(){
      <td class="r">${p?pct(p.pa):'—'}</td><td class="r">${p?n1(p.eA+p.eK):'—'}</td><td class="r">${p?ils(p.eGift):'—'}</td><td class="r">${p?ilsS(contrib(R,p)):'—'}</td>
      <td><button data-del="${g.id}" title="מחיקה">✕</button></td></tr>`;
   }
+  if(isMobile()){ $('#gTableWrap').style.display='none'; $('#gTable').innerHTML='';
+    $('#gCards').innerHTML=gs.map(g=>{const p=perMap.get(g.id);const n=g.isKid?1:1+(+g.plus||0);const k=g.isKid?1:(g.pt==='fixed'?(g.kids||0):0);
+      return `<div class="gcard" data-edit="${g.id}" style="${p?'':'opacity:.45'}"><div class="gc1"><b>${g.n}</b><span class="pill">${g.c}</span><span class="pill">${g.loc}</span></div>
+        <div class="gc2 mini">${n} מוזמנים${k?` (${k} ילדים)`:''}${g.pt==='opt'?' · +1 לא בטוח':''} · ${p?'הגעה '+Math.round(p.pa*100)+'%':'לא בחישוב'}${p?' · מתנה צפויה ₪'+fmt(p.eGift):''}</div></div>`}).join('');
+    return; }
+  $('#gTableWrap').style.display=''; $('#gCards').innerHTML='';
   $('#gTable').innerHTML=h;
 }
+function isMobile(){return window.matchMedia('(max-width: 760px)').matches}
+let gEditId=null;
+function renderGEdit(){const g=S.guests.find(x=>x.id==gEditId);const box=$('#gEditBox');if(!g){$('#gEdit').classList.remove('on');return}
+  const p=R&&R.per.find(x=>x.g.id==g.id);const locOpts=Object.keys(S.att.loc).map(x=>`<option ${x===g.loc?'selected':''}>${x}</option>`).join('');
+  const F=(l,c)=>`<label class="fe"><span>${l}</span>${c}</label>`;
+  box.innerHTML=`<div data-id="${g.id}" class="gform">
+    <div class="flex"><h2 style="margin:0">עריכת הזמנה</h2><button class="right" id="gEditClose">סגירה</button></div>
+    ${F('שם',`<input type="text" data-f="n" value="${g.n.replace(/"/g,'&quot;')}">`)}
+    ${F('קטגוריה',`<input type="text" data-f="cat" value="${g.cat.replace(/"/g,'&quot;')}">`)}
+    ${F('מעגל',`<select data-f="c">${CIRCLES.map(c=>`<option ${c===g.c?'selected':''}>${c}</option>`).join('')}</select>`)}
+    ${F('מיקום',`<select data-f="loc">${locOpts}</select>`)}
+    ${F('כלול בחישוב',`<input type="checkbox" data-f="inc" ${g.inc?'checked':''}>`)}
+    ${F('המוזמן עצמו ילד/ה',`<input type="checkbox" data-f="isKid" ${g.isKid?'checked':''}>`)}
+    ${g.isKid?'':F('מספר מוזמנים',`<input type="number" data-f="cnt" value="${1+(+g.plus||0)}" min="1">`)}
+    ${!g.isKid&&g.plus===1?F('+1 לא בטוח',`<input type="checkbox" data-f="optc" ${g.pt==='opt'?'checked':''}>`):''}
+    ${g.pt==='fixed'?F('מתוכם ילדים מתחת ל-12',`<input type="number" data-f="kids" value="${g.kids||0}" min="0">`):''}
+    ${F('קבוצת מתנה',`<select data-f="seg">${Object.entries(SEG).map(([k,v])=>`<option value="${k}" ${k===g.seg?'selected':''}>${v}</option>`).join('')}</select>`)}
+    ${F('הגעה ידנית %',`<input type="number" data-f="pOv" value="${g.pOv===null||g.pOv===undefined?'':Math.round(g.pOv*100)}" placeholder="לפי המודל" min="0" max="100">`)}
+    ${F('מתנה ידנית ₪',`<input type="number" data-f="gift" value="${g.gift??''}" placeholder="לפי המודל">`)}
+    <div class="mini" style="margin:8px 0">${p?`סיכוי הגעה ${Math.round(p.pa*100)}% · צפי ${p.eA.toFixed(1)} מבוגרים${p.eK?` + ${p.eK.toFixed(1)} ילדים`:''} · מתנה צפויה ₪${fmt(p.eGift)}`:'לא נכלל בחישוב כרגע'}</div>
+    <button data-del="${g.id}" style="color:var(--neg)">מחיקת ההזמנה</button></div>`;}
+document.addEventListener('click',e=>{const c=e.target.closest('[data-edit]');if(c){gEditId=+c.dataset.edit;renderGEdit();$('#gEdit').classList.add('on');}
+  if(e.target.id==='gEditClose'||e.target.id==='gEdit')$('#gEdit').classList.remove('on');});
+document.addEventListener('change',e=>{if(e.target.closest('#gEdit'))setTimeout(()=>{if($('#gEdit').classList.contains('on'))renderGEdit()},250)});
 /* attendance */
 function slider(path,label,min,max,step,f,note=''){
   const v=get(path);
@@ -779,7 +862,7 @@ function drawTornado(T,base){
   T.forEach(t=>{
     const bar=(v,k)=>{const w=Math.abs(v)/mx*50;const side=v<0?`right:50%`:`left:50%`;
       return `<div data-tip="${t.l}<br>${k}: ${v<0?'−':'+'}₪${fmt(Math.abs(v))}" style="position:absolute;top:3px;bottom:3px;${side};width:${Math.max(.3,w)}%;background:${v<0?'var(--neg)':'var(--pos)'};border-radius:3px"></div>`};
-    s+=`<div style="display:grid;grid-template-columns:190px 1fr 70px;gap:8px;align-items:center;margin:3px 0;font-size:13px">
+    s+=`<div style="display:grid;grid-template-columns:minmax(95px,190px) 1fr 60px;gap:8px;align-items:center;margin:3px 0;font-size:13px">
       <span>${t.l}</span>
       <div style="position:relative;height:22px;direction:ltr"><div style="position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--muted)"></div>${bar(t.lo,'ערך ראשון')}${bar(t.hi,'ערך שני')}</div>
       <span class="r mini">±${kfmt(Math.max(Math.abs(t.lo),Math.abs(t.hi)))}</span></div>`});
@@ -787,7 +870,7 @@ function drawTornado(T,base){
 }
 
 /* ---------- events ---------- */
-let T0=null;function changed(full){save();clearTimeout(T0);T0=setTimeout(()=>{if(full)renderControls();syncShows();compute()},120)}
+let T0=null;function changed(full){save();clearTimeout(T0);T0=setTimeout(()=>{if(full)renderControls();syncShows();compute()},200)}
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.dataset.k){set(t.dataset.k, t.type==='range'||t.type==='number'? +t.value : t.value);syncShows();changed();return}
@@ -806,7 +889,7 @@ document.addEventListener('change',e=>{
   if(t.dataset.si!==undefined&&!['on','sure'].includes(t.dataset.sif))return;
   if(t.id==='simN'){S.sim.n=+t.value;changed();return}
   if(t.name==='cm'){S.view.costMode=t.value;changed();return}
-  const tr=t.closest('tr[data-id]');
+  const tr=t.closest('[data-id]');
   if(tr&&t.dataset.f){const g=S.guests.find(x=>x.id==tr.dataset.id);const f=t.dataset.f;
     if(t.type==='checkbox'&&f!=='optc'){g[f]=t.checked;if(f==='isKid'&&t.checked){g.pt='none';g.plus=0;g.kids=0;}}
     else if(f==='plus'||f==='kids')g[f]=Math.max(0,+t.value||0);
@@ -827,11 +910,11 @@ document.addEventListener('click',e=>{
   if(t.dataset.udel!==undefined){const [a,b]=t.dataset.udel.split(':').map(Number);S.sup.items[a].ups.splice(b,1);changed(true);return}
   if(t.dataset.sidel!==undefined){S.sup.items.splice(+t.dataset.sidel,1);changed(true);return}
   if(t.id==='bAddSup'){S.sup.items.push({cat:null,name:'הוצאה חדשה',amt:0,src:'ידני',on:true,sure:false,paid:0,ups:[]});changed(true);return}
-  if(t.dataset.del){S.guests=S.guests.filter(g=>g.id!=t.dataset.del);changed();return}
+  if(t.dataset.del){S.guests=S.guests.filter(g=>g.id!=t.dataset.del);$('#gEdit').classList.remove('on');changed();return}
   if(t.dataset.exdel!==undefined){S.extras.splice(+t.dataset.exdel,1);changed(true);return}
   if(t.dataset.pickv!==undefined){S.venue.src=t.dataset.pickv==='ours'?'ours':+t.dataset.pickv;changed(true);return}
   if(t.dataset.sort){const k=t.dataset.sort;if(S.view.sortK===k)S.view.sortDir*=-1;else{S.view.sortK=k;S.view.sortDir=1}renderGuests();save();return}
-  if(t.id==='bAdd'){const id=Math.max(0,...S.guests.map(g=>g.id))+1;S.guests.unshift({id,n:'הזמנה חדשה',cat:'חברים',c:'B',loc:'צפון',plus:0,pt:'none',kids:0,seg:'friend',cov:false,inc:true,gift:null});$('#gSearch').value='';changed();return}
+  if(t.id==='bAdd'){const id=Math.max(0,...S.guests.map(g=>g.id))+1;S.guests.unshift({id,n:'הזמנה חדשה',cat:'חברים',c:'B',loc:'צפון',plus:0,pt:'none',kids:0,seg:'friend',cov:false,inc:true,gift:null});$('#gSearch').value='';changed();if(isMobile()){gEditId=id;setTimeout(()=>{renderGEdit();$('#gEdit').classList.add('on')},250)}return}
 });
 $('#gSearch').addEventListener('input',()=>renderGuests());
 /* export / import / reset */
@@ -849,8 +932,9 @@ $('#bImport').onclick=()=>openModal('ייבוא','הדביקו גיבוי שיי
 let resetArm=false;$('#bReset').onclick=e=>{if(!resetArm){resetArm=true;e.target.textContent='בטוח? לחצו שוב';setTimeout(()=>{resetArm=false;e.target.textContent='איפוס לברירות מחדל'},3000);return}S=SITE? merge(DEF(),{guests:S.guests,sup:S.sup,extras:S.extras,fund:S.fund,venue:S.venue}) : DEF();save();renderControls();syncShows();compute();e.target.textContent=SITE?'איפוס הנחות המודל':'איפוס לברירות מחדל';resetArm=false};
 /* routing */
 function route(){const h=(location.hash||'#overview').slice(1);const ok=['overview','guests','attendance','gifts','costs','scenarios','model'].includes(h)?h:'overview';
+  document.body.dataset.tab=ok;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='t-'+ok));document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+ok));
-  if(R){ if(ok==='overview')renderOverview(); if(ok==='scenarios'&&scenDirty)renderScen(); }}
+  if(R) renderVisible(); }
 addEventListener('hashchange',route);
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{renderOverview();scenDirty=true;route()},200)});
 renderControls();syncShows();route();compute();renderCountdown();
