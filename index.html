@@ -111,6 +111,9 @@ svg .ax{stroke:var(--line)}
   #supBox>.row>button[data-sopen]{flex:0 0 auto;font-size:13px;padding:6px 7px}
   body:not([data-tab="overview"]) .kpi:nth-child(n+3){display:none}
   .ups{margin-right:8px}
+  .prow{display:flex;flex-wrap:wrap;gap:6px 10px}
+  .prow input[type=text]{flex:1 1 calc(100% - 80px)}
+  tr.subrow td{padding:4px}
   .bars .b{grid-template-columns:105px 1fr 78px;font-size:12.5px}
   table{font-size:12.5px} th,td{padding:5px 4px}
   .countdown .cd{min-width:60px;padding:5px 9px} .countdown .cd b{font-size:19px}
@@ -124,6 +127,11 @@ svg .ax{stroke:var(--line)}
 .countdown .cd span{font-size:12px;color:var(--text2)}
 .ups{margin:2px 34px 8px 0;padding:6px 10px;border-inline-start:2px solid var(--line);background:var(--surface2);border-radius:6px}
 .ups .row{grid-template-columns:28px 1fr 110px 30px;border-bottom:0;padding:3px 0}
+.ppl{margin:2px 0 6px}
+.prow{display:grid;grid-template-columns:28px minmax(120px,260px) max-content max-content 30px;justify-content:start;gap:8px 14px;align-items:center;padding:3px 0}
+.prow label{white-space:nowrap}
+.prow input[type=text]{width:100%}
+tr.subrow td{background:var(--surface2);border-bottom:1px solid var(--line)}
 .paybar{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-top:6px}
 .paybar i{display:block;height:100%;background:var(--good)}
 .legend{display:flex;gap:14px;font-size:12.5px;color:var(--text2);margin-top:4px;flex-wrap:wrap}
@@ -202,7 +210,7 @@ details summary{cursor:pointer;color:var(--text2);font-size:13.5px}
         <input type="text" id="gSearch" placeholder="חיפוש שם / קטגוריה" style="width:200px">
         <span class="mini" id="gCount"></span>
         <button class="right" id="bMerge" disabled>איחוד הנבחרות</button><button id="bAdd">+ הוספת הזמנה</button></div>
-      <p class="hint" style="margin-top:6px">כל שורה היא <b>הזמנה</b> (משק בית). <b>רשומה</b> = מעטפה אחת: משפחה, זוג או יחיד. כדי לאחד, מסמנים ⧉ בכמה שורות ולוחצים "איחוד הנבחרות" (הראשונה ברשימה היא הכותרת). בטלפון: בחלון העריכה, "צירוף להזמנה אחרת". <b>מוזמנים</b> = כמה אנשים ברשומה. כשיש בהזמנה 2, אפשר לסמן <b>"+1 לא בטוח"</b>, ואז השני נספר בהסתברות שבחרתם בלשונית מודל הגעה. "תרומה נטו" = מתנה צפויה פחות העלות השולית שהשורה מוסיפה. <b>ילד/ה</b> = המוזמן עצמו ילד/ה (נספר בחצי מנה, מתנה = "מתנה נוספת לכל ילד"). ההורים של תומר מסומנים "מתנה ידנית 0".</p>
+      <p class="hint" style="margin-top:6px"><b>רשומה</b> = מעטפה אחת: משפחה, זוג או יחיד. לוחצים על כפתור <b>המוזמנים</b> כדי לפתוח את הרשימה: לכל מוזמן אפשר לבטל סימון, לסמן <b>ילד/ה</b> (מתחת ל-12, חצי מנה, לא נספר במינימום) או <b>לא בטוח</b> (נספר בהסתברות שבחרתם בלשונית מודל הגעה), להוסיף ולמחוק. כדי לאחד רשומות: מסמנים ⧉ ולוחצים "איחוד הנבחרות" (הראשונה היא הכותרת), ובטלפון: "צירוף להזמנה אחרת". "תרומה נטו" = מתנה צפויה פחות העלות השולית שהרשומה מוסיפה.</p>
       <div class="tw" id="gTableWrap"><table id="gTable"></table></div><div id="gCards"></div>
     </div>
   </section>
@@ -363,9 +371,11 @@ function mergeInto(st,t,ms){
   let gift=null;
   if(all.some(hasGift)) gift=Math.round(all.reduce((a,g)=>{ if(hasGift(g))return a+(+g.gift); if(g.isKid)return a+kg;
     const k=gKids(g), ad=gPpl(g)-k-gOpt(g)*(1-pp); return a+(seg[g.seg]??450)*(1+sp*(ad-1))+kg*k; },0));
-  t.members=[...(t.members||[]),...ms.flatMap(m=>[m.n,...(m.members||[])])];
-  t.isKid=false; t.plus=total-1; t.kids=kids; t.optN=optN; t.inc=all.some(g=>g.inc!==false); t.gift=gift;
-  if(total===1){t.pt='none';t.optN=0} else if(total===2&&optN===1&&kids===0){t.pt='opt';t.optN=0} else t.pt='fixed';
+  if(typeof buildPeople==='function'&&(t.people||ms.some(m=>m.people))){ all.forEach(buildPeople); t.people=all.flatMap(g=>g.people); delete t.members; syncRecord(t); }
+  else { t.members=[...(t.members||[]),...ms.flatMap(m=>[m.n,...(m.members||[])])];
+  t.isKid=false; t.plus=total-1; t.kids=kids; t.optN=optN;
+  if(total===1){t.pt='none';t.optN=0} else if(total===2&&optN===1&&kids===0){t.pt='opt';t.optN=0} else t.pt='fixed'; }
+  t.inc=all.some(g=>g.inc!==false); t.gift=gift;
   const ids=new Set(ms.map(m=>m.id)); st.guests=st.guests.filter(g=>!ids.has(g.id));
 }
 const GROUPS14=[["hs3h45i", "hma1rdr", "h1er2f5o", "h1c810mq"], ["h1ou4frf", "h104230x"], ["h13nfi2z", "heo3t9l"], ["h12spors", "hhhuavx"], ["hair3m8", "hs1t7fx"], ["hrhcrgy", "h19i68k4"], ["h501kf5", "h1lg3lka"], ["h11s3kv3", "h3nhi6x", "h1ena2j", "h1ryteut", "hw9ld7g"], ["h9epcya", "h5p64f8", "h151lmc5"], ["h12dkmtq", "h1j6ygoj"], ["hkh7r0p", "h55btou"], ["h21vcc7", "hkc1sp8"], ["hnt838i", "h1crihq0", "hhxb2m7"], ["h62c58m", "h1g324v5", "h17hmwzq", "hdwbmov"], ["h1ie5qh1", "h1wl4lfe", "hv1xbb9", "hoat2ud"], ["h1u7o7ft", "h17q1j16", "h1rwe4w9", "h1o2wlac"], ["hc0f7gv", "hgknm4t"]];
@@ -378,9 +388,51 @@ function migrate14(o){ if(!o.guests||!o.gift||!o.att)return; const st={guests:o.
   o.guests=st.guests; }
 function binInv(u,n,p){ if(p<=0)return 0; if(p>=1)return n; let q=Math.pow(1-p,n),c=q,k=0; while(u>c&&k<n){ q=q*(n-k)/(k+1)*p/(1-p); k++; c+=q; } return k; }
 const SEL=new Set();
+/* ---------- named people under each invitation ---------- */
+function syncRecord(g){ if(!g.people)return;
+  const on=g.people.filter(p=>p.on!==false), kids=on.filter(p=>p.kid).length, adults=on.length-kids, uns=on.filter(p=>!p.kid&&p.unsure).length;
+  g._kidsN=0;
+  if(!on.length){g.plus=0;g.kids=0;g.optN=0;g.pt='none';g.isKid=false;return}
+  if(adults===0){g.isKid=true;g._kidsN=kids;g.plus=0;g.kids=0;g.optN=0;g.pt='none';return}
+  g.isKid=false; g.plus=on.length-1; g.kids=kids;
+  const optN=Math.min(uns,adults-1);
+  if(on.length===1){g.pt='none';g.optN=0} else if(on.length===2&&kids===0&&optN===1){g.pt='opt';g.optN=0} else {g.pt='fixed';g.optN=optN}
+}
+function buildPeople(g){
+  if(g.people)return g.people;
+  const first=(g.n||'').trim().split(/\s+/)[0]||'', ppl=[];
+  if(g.isKid){ ppl.push({n:g.n,kid:true,on:true}); }
+  else{
+    const total=gPpl(g); let k=gKids(g), u=gOpt(g);
+    ppl.push({n:g.n,on:true});
+    const mem=(g.members||[]).map(n=>({n,on:true}));
+    mem.forEach(m=>{ if(k>0&&m.n==='ילד/ה'){m.kid=true;k--} });
+    for(let j=mem.length-1;j>=0&&k>0;j--) if(!mem[j].kid){mem[j].kid=true;k--}
+    ppl.push(...mem);
+    let rest=total-ppl.length;
+    while(rest-->0){ if(k>0){ppl.push({n:'ילד/ה של '+first,kid:true,on:true});k--}
+      else if(u>0){ppl.push({n:mem.length?'+1 (לא בטוח)':'+1 של '+first,unsure:true,on:true});u--}
+      else ppl.push({n:'+1 של '+first,on:true}); }
+    for(let j=ppl.length-1;j>0&&u>0;j--) if(!ppl[j].kid&&!ppl[j].unsure){ppl[j].unsure=true;u--}
+  }
+  g.people=ppl; delete g.members; syncRecord(g); return ppl;
+}
+function migrate15(o){ (o.guests||[]).forEach(g=>{ if(!g.people)buildPeople(g); }); }
+function peopleCount(g){return g.people? g.people.filter(p=>p.on!==false).length : gPpl(g)}
+function peopleSummary(g){const on=(g.people||[]).filter(p=>p.on!==false),k=on.filter(p=>p.kid).length,u=on.filter(p=>!p.kid&&p.unsure).length;
+  return `${on.length} מוזמנים${k?` · ${k} ילדים`:''}${u?` · ${u} לא בטוח`:''}`}
+function peopleEditor(g){
+  return `<div class="ups ppl">${(g.people||[]).map((p,j)=>`<div class="prow" style="${p.on===false?'opacity:.5':''}">
+     <input type="checkbox" data-pi="${g.id}:${j}" data-pf="on" ${p.on!==false?'checked':''} title="מוזמן/ת">
+     <input type="text" data-pi="${g.id}:${j}" data-pf="n" value="${(p.n||'').replace(/"/g,'&quot;')}" placeholder="שם">
+     <label class="mini"><input type="checkbox" data-pi="${g.id}:${j}" data-pf="kid" ${p.kid?'checked':''}> ילד/ה</label>
+     <label class="mini" style="${p.kid?'opacity:.4':''}"><input type="checkbox" data-pi="${g.id}:${j}" data-pf="unsure" ${p.unsure&&!p.kid?'checked':''} ${p.kid?'disabled':''}> לא בטוח</label>
+     <button data-pdel="${g.id}:${j}" title="מחיקה">✕</button></div>`).join('')||'<div class="mini">אין מוזמנים ברשומה.</div>'}
+     <button data-padd="${g.id}" style="margin-top:4px">+ מוזמן/ת</button></div>`;
+}
 function DEF(){
   return {
-    guests: SITE? [] : JSON.parse(JSON.stringify(DATA.guests||[])),
+    guests: SITE? [] : JSON.parse(JSON.stringify(DATA.guests||[])).map(g=>{buildPeople(g);return g}),
     att:{base:{S:.95,A:.88,B:.80,C:.70,D:.60},
          loc:{'צפון':1,'מרכז / צפון':.97,'מרכז':.90,'צפון / ירושלים':.90,'אוקראינה':.68},
          pPlus:.5, sys:.04},
@@ -391,12 +443,12 @@ function DEF(){
     extras:[], cont:.10,
     fund:{savings:SITE?0:15000, parents:0},
     filt:{c:{S:true,A:true,B:true,C:true,D:true}, l:{}},
-    sim:{n:2000, seed:7}, ver:14,
+    sim:{n:2000, seed:7}, ver:15,
     view:{costMode:'marginal', sortK:null, sortDir:1}
   };
 }
 let S;
-function loadState(o){ if(!o.ver||o.ver<2){ if(o.gift) o.gift.spouse=1; o.ver=2; } if(o.ver<3){ migrate3(o); o.ver=3; } if(o.ver<4){ migrate4(o); o.ver=4; } if(o.ver<5){ o.ver=5; } if(o.ver<6){ (o.guests||[]).forEach(g=>{ if(g.cat==='משפחה יוליה אוקראינה') g.cov=false; }); o.ver=6; } if(o.ver<7){ if(o.bus) o.bus.on=false; o.ver=7; } if(o.ver<8){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){g.pOv=.6;g.gift=450;g.cov=false}}); o.ver=8; } if(o.ver<9){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){if(g.pOv===.6)g.pOv=null;if(g.gift===450)g.gift=null;}});if(o.att&&o.att.loc&&o.att.loc['אוקראינה']===.35)o.att.loc['אוקראינה']=.68; o.ver=9; } if(o.ver<10){ migrate10(o); o.ver=10; } if(o.ver<11){ migrate11(o); o.ver=11; }  if((o.ver||0)<12){ migrate12(o); } if((o.ver||0)<13){ if(o.sim&&o.sim.n>=4000)o.sim.n=2000; } if((o.ver||0)<14){ migrate14(o); } o.ver=Math.max(o.ver||0,14); return merge(DEF(),o); }
+function loadState(o){ if(!o.ver||o.ver<2){ if(o.gift) o.gift.spouse=1; o.ver=2; } if(o.ver<3){ migrate3(o); o.ver=3; } if(o.ver<4){ migrate4(o); o.ver=4; } if(o.ver<5){ o.ver=5; } if(o.ver<6){ (o.guests||[]).forEach(g=>{ if(g.cat==='משפחה יוליה אוקראינה') g.cov=false; }); o.ver=6; } if(o.ver<7){ if(o.bus) o.bus.on=false; o.ver=7; } if(o.ver<8){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){g.pOv=.6;g.gift=450;g.cov=false}}); o.ver=8; } if(o.ver<9){ (o.guests||[]).forEach(g=>{if(g.cat==='משפחה יוליה אוקראינה'){if(g.pOv===.6)g.pOv=null;if(g.gift===450)g.gift=null;}});if(o.att&&o.att.loc&&o.att.loc['אוקראינה']===.35)o.att.loc['אוקראינה']=.68; o.ver=9; } if(o.ver<10){ migrate10(o); o.ver=10; } if(o.ver<11){ migrate11(o); o.ver=11; }  if((o.ver||0)<12){ migrate12(o); } if((o.ver||0)<13){ if(o.sim&&o.sim.n>=4000)o.sim.n=2000; } if((o.ver||0)<14){ migrate14(o); } if((o.ver||0)<15){ migrate15(o); } o.ver=Math.max(o.ver||0,15); return merge(DEF(),o); }
 try{ const raw=localStorage.getItem(KEY); S = raw? loadState(JSON.parse(raw)) : DEF(); }catch(e){ S=DEF(); }
 function migrate3(o){}
 function oldSupPrice(o,c){const sel=o.sup.sel?.[c]??'avg',up=o.sup.uplift??.05;
@@ -444,7 +496,7 @@ function venueOf(st,src){
 }
 function venueCost(v,A,K){ return v.min*v.pMin + Math.max(0,A-v.min)*v.pExtra + K*v.kidPrice + v.av; }
 function activeGuests(st,circles){
-  return st.guests.filter(g=>g.inc && (circles? circles.includes(g.c) : st.filt.c[g.c]!==false) && st.filt.l[g.loc]!==false);
+  return st.guests.filter(g=>g.inc && (!g.people||g.people.some(p=>p.on!==false)) && (circles? circles.includes(g.c) : st.filt.c[g.c]!==false) && st.filt.l[g.loc]!==false);
 }
 function pAttend(st,g){
   if(g.pOv!==null&&g.pOv!==undefined&&g.pOv!=='') return +g.pOv;
@@ -480,7 +532,7 @@ function simulate(st,opt={}){
   const sg=Math.sqrt(Math.log(1+st.gift.cv**2)), sysg=Math.sqrt(Math.log(1+st.gift.sysCv**2));
   const L=G.length, P=new Float64Array(L), C=new Int32Array(L), KI=new Float64Array(L), AB=new Float64Array(L), OPT=new Uint8Array(L), COV=new Uint8Array(L), MO=new Int32Array(L); const MSa=[];
   for(let i=0;i<L;i++){const g=G[i]; P[i]=pAttend(st,g); C[i]=colOf(g);
-    const kids=g.isKid?1:Math.min(g.kids||0,g.pt==='fixed'?g.plus:0); KI[i]=kids;
+    const kids=g.isKid?(g._kidsN||1):Math.min(g.kids||0,g.pt==='fixed'?g.plus:0); KI[i]=kids;
     const on=g.isKid?0:(g.pt==='opt'?1:(g.pt==='fixed'?Math.max(0,Math.min(g.optN||0,g.plus-kids)):0));
     const ab=g.isKid?0:1+(g.pt==='fixed'?g.plus-kids-on:0); AB[i]=ab; OPT[i]=on; COV[i]=g.cov?1:0;
     MO[i]=MSa.length; for(let q=0;q<=on;q++) MSa.push(giftMean(st,g,ab+q,kids)); }
@@ -697,7 +749,7 @@ function renderFilters(){
 }
 function pivot(key,keys){
   const rows=keys.map(k=>{const ps=R.per.filter(p=>p.g[key]===k);const all=S.guests.filter(g=>g[key]===k&&g.inc);
-    return {k,inv:all.length,max:all.reduce((a,g)=>a+1+g.plus,0),eP:ps.reduce((a,p)=>a+p.eA+p.eK,0),eG:ps.reduce((a,p)=>a+p.eGift,0),c:ps.reduce((a,p)=>a+contrib(R,p),0),on:ps.length>0}});
+    return {k,inv:all.length,max:all.reduce((a,g)=>a+peopleCount(g),0),eP:ps.reduce((a,p)=>a+p.eA+p.eK,0),eG:ps.reduce((a,p)=>a+p.eGift,0),c:ps.reduce((a,p)=>a+contrib(R,p),0),on:ps.length>0}});
   const T=rows.reduce((t,r)=>({inv:t.inv+r.inv,max:t.max+r.max,eP:t.eP+r.eP,eG:t.eG+r.eG,c:t.c+r.c}),{inv:0,max:0,eP:0,eG:0,c:0});
   return `<table><tr><th></th><th class="r">הזמנות</th><th class="r">מקס׳ אנשים</th><th class="r">צפי מגיעים</th><th class="r">מתנות צפויות</th><th class="r">תרומה נטו</th></tr>`+
    rows.map(r=>`<tr style="${r.on?'':'opacity:.45'}"><td><b>${r.k}</b></td><td class="r">${r.inv}</td><td class="r">${r.max}</td><td class="r">${n1(r.eP)}</td><td class="r">${ils(r.eG)}</td><td class="r">${ilsS(r.c)}</td></tr>`).join('')+
@@ -710,37 +762,36 @@ function renderGuests(){
   const perMap=new Map(R.per.map(p=>[p.g.id,p]));
   const q=($('#gSearch').value||'').trim();
   let gs=S.guests.filter(g=>!q||g.n.includes(q)||g.cat.includes(q));
-  const val=(g,k)=>{const p=perMap.get(g.id);switch(k){case 'p':return p?p.pa:-1;case 'e':return p?p.eA+p.eK:-1;case 'g':return p?p.eGift:-1e9;case 'c':return p?contrib(R,p):-1e9;case 'c2':return CIRCLES.indexOf(g.c);default:return g[k]}};
+  const val=(g,k)=>{const p=perMap.get(g.id);switch(k){case 'p':return p?p.pa:-1;case 'e':return p?p.eA+p.eK:-1;case 'g':return p?p.eGift:-1e9;case 'c':return p?contrib(R,p):-1e9;case 'c2':return CIRCLES.indexOf(g.c);case 'ppl':return peopleCount(g);default:return g[k]}};
   if(S.view.sortK) gs=gs.slice().sort((a,b)=>{const x=val(a,S.view.sortK),y=val(b,S.view.sortK);return (x>y?1:x<y?-1:0)*S.view.sortDir});
-  const kids=S.guests.filter(g=>g.inc).reduce((a,g)=>a+(g.isKid?1:(g.kids||0)),0);
-  $('#gCount').innerHTML=`${gs.length} שורות · ילדים מוגדרים: <b>${kids}</b>`;
+  const inc=S.guests.filter(g=>g.inc), kids=inc.reduce((a,g)=>a+(g.people||[]).filter(p=>p.on!==false&&p.kid).length,0), tot=inc.reduce((a,g)=>a+peopleCount(g),0);
+  $('#gCount').innerHTML=`${gs.length} רשומות · ${tot} מוזמנים · ${kids} ילדים`;
   const locOpts=l=>Object.keys(S.att.loc).map(x=>`<option ${x===l?'selected':''}>${x}</option>`).join('');
   const th=(k,t,c='')=>`<th class="sort ${c}" data-sort="${k}">${t}${S.view.sortK===k?(S.view.sortDir>0?' ▲':' ▼'):''}</th>`;
-  let h=`<tr><th title="בחירה לאיחוד">⧉</th><th>כלול</th>${th('n','שם')}${th('cat','קטגוריה')}${th('c2','מעגל')}${th('loc','מיקום')}<th>ילד/ה</th><th title="כמה מוזמנים בהזמנה, כמו 'סה״כ מוזמנים' בגיליון">מוזמנים</th><th>ילדים</th>${th('seg','קבוצת מתנה')}<th>מכוסה</th><th>הגעה ידנית %</th><th>מתנה ידנית ₪</th>${th('p','הגעה','r')}${th('e','צפי אנשים','r')}${th('g','מתנה צפויה','r')}${th('c','תרומה נטו','r')}<th></th></tr>`;
+  let h=`<tr><th title="בחירה לאיחוד">⧉</th><th>כלול</th>${th('n','רשומה')}${th('cat','קטגוריה')}${th('c2','מעגל')}${th('loc','מיקום')}${th('ppl','מוזמנים')}${th('seg','קבוצת מתנה')}<th>מכוסה</th><th>הגעה ידנית %</th><th>מתנה ידנית ₪</th>${th('p','הגעה','r')}${th('e','צפי אנשים','r')}${th('g','מתנה צפויה','r')}${th('c','תרומה נטו','r')}<th></th></tr>`;
   for(const g of gs){
     const p=perMap.get(g.id);
     h+=`<tr data-id="${g.id}" style="${p?'':'opacity:.45'}">
      <td><input type="checkbox" data-sel="${g.id}" ${SEL.has(g.id)?'checked':''} title="בחירה לאיחוד"></td>
      <td><input type="checkbox" data-f="inc" ${g.inc?'checked':''}></td>
-     <td><input type="text" data-f="n" value="${g.n.replace(/"/g,'&quot;')}" style="width:140px">${(g.members||[]).length?`<div class="mini" style="max-width:170px">כולל: ${g.members.join(', ')}</div>`:''}</td>
+     <td><input type="text" data-f="n" value="${g.n.replace(/"/g,'&quot;')}" style="width:150px"><div class="mini" style="max-width:190px">${(g.people||[]).filter(p=>p.on!==false&&p.n!==g.n).map(p=>p.n).join(', ')}</div></td>
      <td><input type="text" data-f="cat" value="${g.cat.replace(/"/g,'&quot;')}" style="width:130px"></td>
      <td><select data-f="c">${CIRCLES.map(c=>`<option ${c===g.c?'selected':''}>${c}</option>`).join('')}</select></td>
      <td><select data-f="loc">${locOpts(g.loc)}</select></td>
-     <td><input type="checkbox" data-f="isKid" ${g.isKid?'checked':''} title="המוזמן עצמו ילד/ה"></td>
-     <td>${g.isKid?'<span class="mini">—</span>':`<input type="number" data-f="cnt" value="${1+(+g.plus||0)}" min="1" style="width:52px" title="כמה מוזמנים בהזמנה הזאת">${g.plus===1?`<label class="mini" style="display:block;white-space:nowrap"><input type="checkbox" data-f="optc" ${g.pt==='opt'?'checked':''}> +1 לא בטוח</label>`:''}${g.pt==='fixed'&&g.plus>=2?`<label class="mini" style="display:block;white-space:nowrap">לא בטוחים <input type="number" data-f="optN" value="${g.optN||0}" min="0" style="width:40px"></label>`:''}`}</td>
-
-     <td>${g.pt==='fixed'?`<input type="number" data-f="kids" value="${g.kids||0}" min="0" style="width:52px">`:'<span class="mini">—</span>'}</td>
+     <td><button data-gopen="${g.id}" style="white-space:nowrap">${g.open?'▾':'▸'} ${peopleSummary(g)}</button></td>
      <td><select data-f="seg" class="seg-tag">${Object.entries(SEG).map(([k,v])=>`<option value="${k}" ${k===g.seg?'selected':''}>${v}</option>`).join('')}</select></td>
      <td><input type="checkbox" data-f="cov" ${g.cov?'checked':''} title="מישהו מכסה את עלות הראש"></td>
      <td><input type="number" data-f="pOv" value="${g.pOv===null||g.pOv===undefined?'':Math.round(g.pOv*100)}" placeholder="מודל" min="0" max="100" style="width:64px"></td>
      <td><input type="number" data-f="gift" value="${g.gift??''}" placeholder="מודל" style="width:80px"></td>
      <td class="r">${p?pct(p.pa):'—'}</td><td class="r">${p?n1(p.eA+p.eK):'—'}</td><td class="r">${p?ils(p.eGift):'—'}</td><td class="r">${p?ilsS(contrib(R,p)):'—'}</td>
      <td><button data-del="${g.id}" title="מחיקה">✕</button></td></tr>`;
+    if(g.open) h+=`<tr class="subrow"><td></td><td colspan="15">${peopleEditor(g)}</td></tr>`;
   }
   if(isMobile()){ $('#gTableWrap').style.display='none'; $('#gTable').innerHTML='';
-    $('#gCards').innerHTML=gs.map(g=>{const p=perMap.get(g.id);const n=g.isKid?1:1+(+g.plus||0);const k=g.isKid?1:(g.pt==='fixed'?(g.kids||0):0);
-      return `<div class="gcard" data-edit="${g.id}" style="${p?'':'opacity:.45'}"><div class="gc1"><b>${g.n}</b><span class="pill">${g.c}</span><span class="pill">${g.loc}</span></div>${(g.members||[]).length?`<div class="mini">כולל: ${g.members.join(', ')}</div>`:''}
-        <div class="gc2 mini">${n} מוזמנים${k?` (${k} ילדים)`:''}${g.pt==='opt'?' · +1 לא בטוח':''} · ${p?'הגעה '+Math.round(p.pa*100)+'%':'לא בחישוב'}${p?' · מתנה צפויה ₪'+fmt(p.eGift):''}</div></div>`}).join('');
+    $('#gCards').innerHTML=gs.map(g=>{const p=perMap.get(g.id);const names=(g.people||[]).filter(x=>x.on!==false).map(x=>x.n+(x.kid?' (ילד/ה)':x.unsure?' (?)':'')).join(', ');
+      return `<div class="gcard" data-edit="${g.id}" style="${p?'':'opacity:.45'}"><div class="gc1"><b>${g.n}</b><span class="pill">${g.c}</span><span class="pill">${g.loc}</span></div>
+        <div class="mini">${names}</div>
+        <div class="gc2 mini">${peopleSummary(g)} · ${p?'הגעה '+Math.round(p.pa*100)+'%':'לא בחישוב'}${p?' · מתנה צפויה ₪'+fmt(p.eGift):''}</div></div>`}).join('');
     return; }
   $('#gTableWrap').style.display=''; $('#gCards').innerHTML='';
   $('#gTable').innerHTML=h;
@@ -752,17 +803,12 @@ function renderGEdit(){const g=S.guests.find(x=>x.id==gEditId);const box=$('#gEd
   const F=(l,c)=>`<label class="fe"><span>${l}</span>${c}</label>`;
   box.innerHTML=`<div data-id="${g.id}" class="gform">
     <div class="flex"><h2 style="margin:0">עריכת הזמנה</h2><button class="right" id="gEditClose">סגירה</button></div>
-    ${F('שם',`<input type="text" data-f="n" value="${g.n.replace(/"/g,'&quot;')}">`)}
+    ${F('שם הרשומה',`<input type="text" data-f="n" value="${g.n.replace(/"/g,'&quot;')}">`)}
     ${F('קטגוריה',`<input type="text" data-f="cat" value="${g.cat.replace(/"/g,'&quot;')}">`)}
     ${F('מעגל',`<select data-f="c">${CIRCLES.map(c=>`<option ${c===g.c?'selected':''}>${c}</option>`).join('')}</select>`)}
     ${F('מיקום',`<select data-f="loc">${locOpts}</select>`)}
     ${F('כלול בחישוב',`<input type="checkbox" data-f="inc" ${g.inc?'checked':''}>`)}
-    ${F('המוזמן עצמו ילד/ה',`<input type="checkbox" data-f="isKid" ${g.isKid?'checked':''}>`)}
-    ${g.isKid?'':F('מספר מוזמנים',`<input type="number" data-f="cnt" value="${1+(+g.plus||0)}" min="1">`)}
-    ${!g.isKid&&g.plus===1?F('+1 לא בטוח',`<input type="checkbox" data-f="optc" ${g.pt==='opt'?'checked':''}>`):''}
-    ${g.pt==='fixed'?F('מתוכם ילדים מתחת ל-12',`<input type="number" data-f="kids" value="${g.kids||0}" min="0">`):''}
-    ${g.pt==='fixed'&&g.plus>=2?F('מתוכם מבוגרים לא בטוחים',`<input type="number" data-f="optN" value="${g.optN||0}" min="0">`):''}
-    ${(g.members||[]).length?`<div class="mini" style="padding:6px 0">כולל: ${g.members.join(', ')}</div>`:''}
+    <div style="padding:8px 0 2px"><b>מוזמנים ברשומה</b> <span class="mini">${peopleSummary(g)}</span></div>${peopleEditor(g)}
     ${F('קבוצת מתנה',`<select data-f="seg">${Object.entries(SEG).map(([k,v])=>`<option value="${k}" ${k===g.seg?'selected':''}>${v}</option>`).join('')}</select>`)}
     ${F('הגעה ידנית %',`<input type="number" data-f="pOv" value="${g.pOv===null||g.pOv===undefined?'':Math.round(g.pOv*100)}" placeholder="לפי המודל" min="0" max="100">`)}
     ${F('מתנה ידנית ₪',`<input type="number" data-f="gift" value="${g.gift??''}" placeholder="לפי המודל">`)}
@@ -772,6 +818,9 @@ function renderGEdit(){const g=S.guests.find(x=>x.id==gEditId);const box=$('#gEd
 document.addEventListener('click',e=>{const c=e.target.closest('[data-edit]');if(c){gEditId=+c.dataset.edit;renderGEdit();$('#gEdit').classList.add('on');}
   if(e.target.id==='gEditClose'||e.target.id==='gEdit')$('#gEdit').classList.remove('on');});
 document.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset&&t.dataset.pi){const [gid,j]=t.dataset.pi.split(':').map(Number);const g=S.guests.find(x=>x.id===gid);if(!g)return;const pp=g.people[j];const f=t.dataset.pf;
+    if(f==='n')pp.n=t.value; else pp[f]=t.checked; if(f==='kid'&&t.checked)pp.unsure=false;
+    syncRecord(g); changed(); return;}
   if(t.dataset&&t.dataset.sel){const id=+t.dataset.sel; t.checked?SEL.add(id):SEL.delete(id); const b=$('#bMerge'); b.disabled=SEL.size<2; b.textContent=SEL.size>=2?`איחוד הנבחרות (${SEL.size})`:'איחוד הנבחרות'; return;}
   if(t.id==='gMergeTo'&&t.value){const g=S.guests.find(x=>x.id==gEditId), tgt=S.guests.find(x=>x.id==+t.value); if(g&&tgt){mergeInto(S,tgt,[g]); gEditId=tgt.id; changed(); setTimeout(()=>{if($('#gEdit').classList.contains('on'))renderGEdit()},300);} return;}
 });
@@ -952,9 +1001,12 @@ document.addEventListener('click',e=>{
   if(t.dataset.exdel!==undefined){S.extras.splice(+t.dataset.exdel,1);changed(true);return}
   if(t.dataset.pickv!==undefined){S.venue.src=t.dataset.pickv==='ours'?'ours':+t.dataset.pickv;changed(true);return}
   if(t.dataset.sort){const k=t.dataset.sort;if(S.view.sortK===k)S.view.sortDir*=-1;else{S.view.sortK=k;S.view.sortDir=1}renderGuests();save();return}
+  if(t.dataset.gopen){const g=S.guests.find(x=>x.id==+t.dataset.gopen);g.open=!g.open;renderGuests();save();return}
+  if(t.dataset.padd){const g=S.guests.find(x=>x.id==+t.dataset.padd);buildPeople(g);g.people.push({n:'',on:true});g.open=true;syncRecord(g);changed();if($('#gEdit').classList.contains('on'))setTimeout(renderGEdit,260);return}
+  if(t.dataset.pdel){const [gid,j]=t.dataset.pdel.split(':').map(Number);const g=S.guests.find(x=>x.id===gid);g.people.splice(j,1);syncRecord(g);changed();if($('#gEdit').classList.contains('on'))setTimeout(renderGEdit,260);return}
   if(t.id==='bMerge'){ const rows=[...document.querySelectorAll('#gTable [data-sel]')].filter(x=>x.checked).map(x=>S.guests.find(g=>g.id==+x.dataset.sel)).filter(Boolean);
     if(rows.length>=2){ mergeInto(S,rows[0],rows.slice(1)); SEL.clear(); t.disabled=true; t.textContent='איחוד הנבחרות'; changed(); } return}
-  if(t.id==='bAdd'){const id=Math.max(0,...S.guests.map(g=>g.id))+1;S.guests.unshift({id,n:'הזמנה חדשה',cat:'חברים',c:'B',loc:'צפון',plus:0,pt:'none',kids:0,seg:'friend',cov:false,inc:true,gift:null});$('#gSearch').value='';changed();if(isMobile()){gEditId=id;setTimeout(()=>{renderGEdit();$('#gEdit').classList.add('on')},250)}return}
+  if(t.id==='bAdd'){const id=Math.max(0,...S.guests.map(g=>g.id))+1;S.guests.unshift({id,n:'הזמנה חדשה',cat:'חברים',c:'B',loc:'צפון',plus:0,pt:'none',kids:0,seg:'friend',cov:false,inc:true,gift:null,open:true,people:[{n:'',on:true}]});$('#gSearch').value='';changed();if(isMobile()){gEditId=id;setTimeout(()=>{renderGEdit();$('#gEdit').classList.add('on')},250)}return}
 });
 $('#gSearch').addEventListener('input',()=>renderGuests());
 /* export / import / reset */
@@ -965,8 +1017,8 @@ $('#mFileBtn').onclick=()=>$('#mFile').click();
 $('#mFile').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{$('#mText').value=t})};
 async function copyText(){try{await navigator.clipboard.writeText($('#mText').value);$('#mMsg').textContent='הועתק ✔'}catch(e){$('#mText').select();$('#mMsg').textContent='סמנו והעתיקו ידנית (Ctrl+C)'}}
 $('#bExport').onclick=()=>openModal('ייצוא / גיבוי','העתיקו ושמרו בקובץ או בפתק. אפשר לטעון את זה מחדש דרך "ייבוא", גם במכשיר אחר.',JSON.stringify(S),copyText,'העתקה');
-$('#bCsv').onclick=()=>{const head='שם,קטגוריה,מעגל,מיקום,ילד,סוג פלוס,פלוס,ילדים,קבוצת מתנה,מכוסה,כלול,מתנה ידנית,סיכוי הגעה,צפי אנשים,מתנה צפויה';const pm=new Map(R.per.map(p=>[p.g.id,p]));
-  const rows=S.guests.map(g=>{const p=pm.get(g.id);return [g.n,g.cat,g.c,g.loc,g.isKid?1:0,g.pt,g.plus,g.kids||0,SEG[g.seg],g.cov?1:0,g.inc?1:0,g.gift??'',p?p.pa.toFixed(2):'',p?(p.eA+p.eK).toFixed(2):'',p?Math.round(p.eGift):''].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')});
+$('#bCsv').onclick=()=>{const head='שם,מוזמנים בשמות,קטגוריה,מעגל,מיקום,ילד,סוג פלוס,פלוס,ילדים,קבוצת מתנה,מכוסה,כלול,מתנה ידנית,סיכוי הגעה,צפי אנשים,מתנה צפויה';const pm=new Map(R.per.map(p=>[p.g.id,p]));
+  const rows=S.guests.map(g=>{const p=pm.get(g.id);return [g.n,(g.people||[]).filter(x=>x.on!==false).map(x=>x.n).join(' / '),g.cat,g.c,g.loc,g.isKid?1:0,g.pt,g.plus,g.kids||0,SEG[g.seg],g.cov?1:0,g.inc?1:0,g.gift??'',p?p.pa.toFixed(2):'',p?(p.eA+p.eK).toFixed(2):'',p?Math.round(p.eGift):''].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')});
   openModal('רשימת מוזמנים (CSV)','העתיקו והדביקו ב-Google Sheets (הדבקה בתא A1).',head+'\n'+rows.join('\n'),copyText,'העתקה')};
 $('#bImport').onclick=()=>openModal('ייבוא','הדביקו גיבוי שייצאתם קודם (JSON), או טענו קובץ.','',()=>{try{const o=JSON.parse($('#mText').value);S=loadState(o);save();renderControls();syncShows();compute();modal.classList.remove('on')}catch(e){$('#mMsg').textContent='לא הצלחתי לקרוא את הטקסט'}},'טעינה',true);
 let resetArm=false;$('#bReset').onclick=e=>{if(!resetArm){resetArm=true;e.target.textContent='בטוח? לחצו שוב';setTimeout(()=>{resetArm=false;e.target.textContent='איפוס לברירות מחדל'},3000);return}S=SITE? merge(DEF(),{guests:S.guests,sup:S.sup,extras:S.extras,fund:S.fund,venue:S.venue}) : DEF();save();renderControls();syncShows();compute();e.target.textContent=SITE?'איפוס הנחות המודל':'איפוס לברירות מחדל';resetArm=false};
