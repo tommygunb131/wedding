@@ -149,6 +149,13 @@ details summary{cursor:pointer;color:var(--text2);font-size:13.5px}
 .seg-tag{font-size:12px}
 .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .right{margin-inline-start:auto}
+.dep{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface2)}
+.dep input[type=checkbox],.stdrec input[type=checkbox]{width:18px;height:18px;margin:0}
+.stdrec{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}
+.stdrec.done{border-color:var(--good)}
+.stdrec .hd{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stdrec .pp{display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 26px 0 0}
+.stdrec .pp label{display:inline-flex;gap:6px;align-items:center;font-size:14px}
 </style>
 </head>
 <body>
@@ -165,7 +172,7 @@ details summary{cursor:pointer;color:var(--text2);font-size:13.5px}
   </div>
 </header>
 <nav><div class="in" id="nav">
-  <a href="#overview">סקירה</a><a href="#guests">מוזמנים</a><a href="#attendance">מודל הגעה</a><a href="#gifts">מתנות</a><a href="#costs">עלויות</a><a href="#scenarios">תרחישים</a><a href="#model">מדריך והסבר</a>
+  <a href="#overview">סקירה</a><a href="#guests">מוזמנים</a><a href="#std">Save the date</a><a href="#attendance">מודל הגעה</a><a href="#gifts">מתנות</a><a href="#costs">עלויות</a><a href="#scenarios">תרחישים</a><a href="#model">מדריך והסבר</a>
 </div></nav>
 <main>
   <div class="kpis" id="kpis"></div>
@@ -213,6 +220,24 @@ details summary{cursor:pointer;color:var(--text2);font-size:13.5px}
       <p class="hint" style="margin-top:6px"><b>רשומה</b> = מעטפה אחת: משפחה, זוג או יחיד. לוחצים על כפתור <b>המוזמנים</b> כדי לפתוח את הרשימה: לכל מוזמן אפשר לבטל סימון, לסמן <b>ילד/ה</b> (מתחת ל-12, חצי מנה, לא נספר במינימום) או <b>לא בטוח</b> (נספר בהסתברות שבחרתם בלשונית מודל הגעה), להוסיף ולמחוק. כדי לאחד רשומות: מסמנים ⧉ ולוחצים "איחוד הנבחרות" (הראשונה היא הכותרת), ובטלפון: "צירוף להזמנה אחרת". "תרומה נטו" = מתנה צפויה פחות העלות השולית שהרשומה מוסיפה.</p>
       <div class="tw" id="gTableWrap"><table id="gTable"></table></div><div id="gCards"></div>
     </div>
+  </section>
+
+  <!-- SAVE THE DATE -->
+  <section class="tab" id="t-std">
+    <div class="card">
+      <h2>Save the date: למי כבר שלחנו?</h2>
+      <p class="hint">כל הרשומות שמסומנות "כלול", עם המוזמנים שבתוכן. מסמנים כל מוזמן בנפרד, או את הרשומה כולה בבת אחת. מוזמן שנוסף לרשומה אחרי השליחה יופיע כ"טרם נשלח".</p>
+      <div id="stdSum"></div>
+      <div class="flex" style="margin-top:10px">
+        <input type="text" id="stdSearch" placeholder="חיפוש שם / קטגוריה" style="width:200px">
+        <div class="chips" id="stdFilt">
+          <label class="chip"><input type="radio" name="stdf" value="all" checked>הכול</label>
+          <label class="chip"><input type="radio" name="stdf" value="todo">טרם נשלח</label>
+          <label class="chip"><input type="radio" name="stdf" value="done">נשלח</label>
+        </div>
+      </div>
+    </div>
+    <div id="stdList"></div>
   </section>
 
   <!-- ATTENDANCE -->
@@ -438,7 +463,7 @@ function DEF(){
          pPlus:.5, sys:.04},
     gift:{seg:{student:375,friend:500,work:375,famext:500,famclose:500,pfriends:500},
           spouse:1, kid:100, cv:.25, sysCv:.10, noGift:.03, coverPP:370},
-    venue:{src:'ours', min:130, pMin:390, pExtra:390, kidPct:.5, kidPrice:245, av:0, reserve:.10, paid:0},
+    venue:{src:'ours', min:130, pMin:390, pExtra:390, kidPct:.5, kidPrice:245, av:0, reserve:.10, paid:0, depPct:.2, depPaid:false, depDate:''},
     sup:{uplift:.05, items:SITE? [] : NEWITEMS()},
     extras:[], cont:.10,
     fund:{savings:SITE?0:15000, parents:0},
@@ -602,10 +627,10 @@ function compute(){
   R=simulate(S,{per:true});
   renderKPIs();renderVisible();
 }
-function curTab(){const h=(location.hash||'#overview').slice(1);return ['overview','guests','attendance','gifts','costs','scenarios','model'].includes(h)?h:'overview'}
+function curTab(){const h=(location.hash||'#overview').slice(1);return ['overview','guests','std','attendance','gifts','costs','scenarios','model'].includes(h)?h:'overview'}
 function renderVisible(){const t=curTab();
   if(t==='overview')renderOverview(); else if(t==='guests'){renderGuests();if($('#gEdit').classList.contains('on'))renderGEdit();}
-  else if(t==='attendance')renderAttMatrix(); else if(t==='gifts')renderGiftTable(); else if(t==='costs')renderPay();
+  else if(t==='attendance')renderAttMatrix(); else if(t==='gifts')renderGiftTable(); else if(t==='costs')renderPay(); else if(t==='std')renderStd();
   scenDirty=true; if(t==='scenarios')scheduleScen();}
 function renderKPIs(){
   const nets=R.nets, p10=quant(nets,.1),p50=quant(nets,.5),p90=quant(nets,.9);
@@ -675,14 +700,45 @@ function renderPay(){const el=$('#payCard');if(!el)return;
   const inc=S.sup.items.filter(x=>x.on!==false);
   const venueCommit=(+S.venue.min)*(+S.venue.pMin)+(+S.venue.av||0);
   const total=venueCommit+inc.reduce((a,x)=>a+itemCost(x),0);
-  const paid=(+S.venue.paid||0)+inc.reduce((a,x)=>a+(+x.paid||0),0);
+  const dep=Math.round((+S.venue.depPct||0)*(+S.venue.min)*(+S.venue.pMin));
+  const paid=(S.venue.depPaid?dep:0)+(+S.venue.paid||0)+inc.reduce((a,x)=>a+(+x.paid||0),0);
   const pct=total?Math.min(1,paid/total):0;
   el.innerHTML=`<h2>תשלומים</h2><div class="flex" style="gap:18px">
     <div><div class="mini">התחייבויות (מקום לפי מינימום + הוצאות שנכללו)</div><b style="font-size:18px">₪${fmt(total)}</b></div>
     <div><div class="mini">שולם עד כה</div><b style="font-size:18px" class="pos">₪${fmt(paid)}</b></div>
     <div><div class="mini">נותר לשלם</div><b style="font-size:18px">₪${fmt(Math.max(0,total-paid))}</b></div></div>
     <div class="paybar"><i style="width:${(pct*100).toFixed(1)}%"></i></div>
-    <div class="mini" style="margin-top:4px">${(pct*100).toFixed(0)}% שולם. מבוגרים מעל המינימום וילדים נוספים בחשבון הסופי מול המקום.</div>`;}
+    <div class="mini" style="margin-top:4px">${(pct*100).toFixed(0)}% שולם. מבוגרים מעל המינימום וילדים נוספים בחשבון הסופי מול המקום.</div>
+    <label class="dep"><input type="checkbox" id="depPaid" ${S.venue.depPaid?'checked':''}>
+      <span><b>מקדמה למקום</b>: ${Math.round((+S.venue.depPct||0)*100)}% מההזמנה (<span class="num">${fmt(+S.venue.min)} × ₪${fmt(+S.venue.pMin)}</span>) = <b class="num">₪${fmt(dep)}</b></span>
+      <span class="${S.venue.depPaid?'pos':'mini'}">${S.venue.depPaid?'✓ שולם'+(S.venue.depDate?' ב-<span class="num">'+S.venue.depDate.split('-').reverse().join('.')+'</span>':''):'טרם שולם'}</span></label>`;}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+/* ---------- save the date ---------- */
+function esc(x){return String(x??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function stdDate(d){return typeof d==='string'?d.split('-').reverse().join('.'):''}
+function renderStd(){const list=$('#stdList');if(!list)return;
+  const recs=S.guests.filter(g=>g.inc!==false).map(g=>{buildPeople(g);const pp=g.people.map((p,j)=>({p,j})).filter(x=>x.p.on!==false);return {g,pp,sent:pp.filter(x=>x.p.std).length}});
+  const P=recs.reduce((a,r)=>a+r.pp.length,0), Ps=recs.reduce((a,r)=>a+r.sent,0);
+  const Rn=recs.filter(r=>r.pp.length).length, Rd=recs.filter(r=>r.pp.length&&r.sent===r.pp.length).length, Rp=recs.filter(r=>r.sent&&r.sent<r.pp.length).length;
+  const pc=P?Ps/P:0;
+  $('#stdSum').innerHTML=`<div class="flex" style="gap:18px">
+    <div><div class="mini">מוזמנים שקיבלו</div><b style="font-size:18px" class="num">${Ps} / ${P}</b></div>
+    <div><div class="mini">רשומות שהושלמו</div><b style="font-size:18px" class="num">${Rd} / ${Rn}</b></div>
+    ${Rp?`<div><div class="mini">רשומות חלקיות</div><b style="font-size:18px" class="num">${Rp}</b></div>`:''}</div>
+    <div class="paybar"><i style="width:${(pc*100).toFixed(1)}%"></i></div>`;
+  const q=($('#stdSearch').value||'').trim(), f=(document.querySelector('input[name=stdf]:checked')||{}).value||'all';
+  let rs=recs.filter(r=>r.pp.length);
+  if(q) rs=rs.filter(r=>(r.g.n||'').includes(q)||(r.g.cat||'').includes(q)||r.pp.some(x=>(x.p.n||'').includes(q)));
+  if(f==='todo') rs=rs.filter(r=>r.sent<r.pp.length); else if(f==='done') rs=rs.filter(r=>r.sent===r.pp.length);
+  rs.sort((a,b)=>(a.g.cat||'').localeCompare(b.g.cat||'','he')||(a.g.n||'').localeCompare(b.g.n||'','he'));
+  list.innerHTML=rs.map(r=>{const all=r.sent===r.pp.length;
+    return `<div class="stdrec ${all?'done':''}">
+      <label class="hd"><input type="checkbox" data-stdr="${r.g.id}" ${all?'checked':''} ${r.sent&&!all?'data-ind="1"':''}><b>${esc(r.g.n)}</b><span class="pill">${esc(r.g.cat)}</span><span class="mini num">${r.sent}/${r.pp.length}</span></label>
+      ${r.pp.length>1||r.pp[0].p.n!==r.g.n?`<div class="pp">${r.pp.map(({p,j})=>`<label><input type="checkbox" data-std="${r.g.id}:${j}" ${p.std?'checked':''}>${esc(p.n)||'<span class="mini">(ללא שם)</span>'}${p.kid?' <span class="mini">(ילד/ה)</span>':''}${p.std&&stdDate(p.std)?` <span class="mini num">${stdDate(p.std)}</span>`:''}</label>`).join('')}</div>`:''}
+    </div>`}).join('')||'<div class="card mini">אין רשומות שמתאימות לסינון.</div>';
+  list.querySelectorAll('[data-ind]').forEach(x=>x.indeterminate=true);
+  const ex=S.guests.length-recs.length; if(ex) list.insertAdjacentHTML('beforeend',`<div class="mini" style="margin-top:6px">${ex} רשומות לא כלולות ולא מוצגות כאן.</div>`);
+}
 function renderCountdown(){const el=$('#countdown');if(!el)return;
   const now=new Date(),t=new Date(2027,3,2);now.setHours(0,0,0,0);
   if(now>=t){el.innerHTML='<div class="cd"><b>🎉</b><span>מזל טוב</span></div>';return}
@@ -848,7 +904,7 @@ function renderControls(){
      numIn('gift.coverPP','כיסוי לראש לשורות "מכוסה" (₪)')+
      `<div class="mini" id="coupleHint"></div>`;
   // venue
-  $('#venueBox').innerHTML = numIn('venue.min','התחייבות (מינימום מבוגרים)','משלמים עליהם גם אם לא מגיעים')+numIn('venue.pMin','מחיר לראש (עד המינימום)','₪')+numIn('venue.pExtra','מחיר לכל מבוגר נוסף','₪, מעל ההתחייבות')+slider('venue.reserve','רזרבה (ספייר)',0,.25,.01,'%','כמה מנות מעל ההתחייבות המקום מכין. כל מבוגר בתוך הרזרבה עולה את "המחיר הנוסף"')+numIn('venue.kidPrice','מחיר ילד מתחת לגיל 12','₪, לא נספר במינימום')+numIn('venue.av','תוספות אולם (הגברה/תאורה/הצללה)','₪, אם לא כלול')+numIn('venue.paid','שולם למקום עד כה','₪');
+  $('#venueBox').innerHTML = numIn('venue.min','התחייבות (מינימום מבוגרים)','משלמים עליהם גם אם לא מגיעים')+numIn('venue.pMin','מחיר לראש (עד המינימום)','₪')+numIn('venue.pExtra','מחיר לכל מבוגר נוסף','₪, מעל ההתחייבות')+slider('venue.reserve','רזרבה (ספייר)',0,.25,.01,'%','כמה מנות מעל ההתחייבות המקום מכין. כל מבוגר בתוך הרזרבה עולה את "המחיר הנוסף"')+numIn('venue.kidPrice','מחיר ילד מתחת לגיל 12','₪, לא נספר במינימום')+numIn('venue.av','תוספות אולם (הגברה/תאורה/הצללה)','₪, אם לא כלול')+numIn('venue.paid','שולם למקום מעבר למקדמה','₪, המקדמה מסומנת בכרטיס התשלומים');
   // suppliers
   const tot=k=>S.sup.items.filter(k).reduce((a,x)=>a+(+x.amt||0),0);
   $('#supBox').innerHTML=S.sup.items.map((x,i)=>{
@@ -1009,6 +1065,15 @@ document.addEventListener('click',e=>{
   if(t.id==='bAdd'){const id=Math.max(0,...S.guests.map(g=>g.id))+1;S.guests.unshift({id,n:'הזמנה חדשה',cat:'חברים',c:'B',loc:'צפון',plus:0,pt:'none',kids:0,seg:'friend',cov:false,inc:true,gift:null,open:true,people:[{n:'',on:true}]});$('#gSearch').value='';changed();if(isMobile()){gEditId=id;setTimeout(()=>{renderGEdit();$('#gEdit').classList.add('on')},250)}return}
 });
 $('#gSearch').addEventListener('input',()=>renderGuests());
+$('#stdSearch').addEventListener('input',()=>renderStd());
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.name==='stdf'){renderStd();return}
+  if(t.id==='depPaid'){S.venue.depPaid=t.checked;S.venue.depDate=t.checked?today():'';save();renderPay();return}
+  if(t.dataset.std){const [gid,j]=t.dataset.std.split(':').map(Number);const g=S.guests.find(x=>x.id===gid);if(!g||!g.people[j])return;
+    if(t.checked)g.people[j].std=today(); else delete g.people[j].std; save();renderStd();return}
+  if(t.dataset.stdr){const g=S.guests.find(x=>x.id==+t.dataset.stdr);if(!g)return;const d=today();
+    g.people.forEach(p=>{if(p.on===false)return; if(t.checked){if(!p.std)p.std=d}else delete p.std;}); save();renderStd();return}
+});
 /* export / import / reset */
 const modal=$('#modal');
 function openModal(title,hint,text,go,goLabel,file){$('#mTitle').textContent=title;$('#mHint').textContent=hint;$('#mText').value=text;$('#mGo').textContent=goLabel;$('#mGo').onclick=go;$('#mMsg').textContent='';$('#mFileBtn').style.display=file?'':'none';modal.classList.add('on')}
@@ -1023,7 +1088,7 @@ $('#bCsv').onclick=()=>{const head='שם,מוזמנים בשמות,קטגורי�
 $('#bImport').onclick=()=>openModal('ייבוא','הדביקו גיבוי שייצאתם קודם (JSON), או טענו קובץ.','',()=>{try{const o=JSON.parse($('#mText').value);S=loadState(o);save();renderControls();syncShows();compute();modal.classList.remove('on')}catch(e){$('#mMsg').textContent='לא הצלחתי לקרוא את הטקסט'}},'טעינה',true);
 let resetArm=false;$('#bReset').onclick=e=>{if(!resetArm){resetArm=true;e.target.textContent='בטוח? לחצו שוב';setTimeout(()=>{resetArm=false;e.target.textContent='איפוס לברירות מחדל'},3000);return}S=SITE? merge(DEF(),{guests:S.guests,sup:S.sup,extras:S.extras,fund:S.fund,venue:S.venue}) : DEF();save();renderControls();syncShows();compute();e.target.textContent=SITE?'איפוס הנחות המודל':'איפוס לברירות מחדל';resetArm=false};
 /* routing */
-function route(){const h=(location.hash||'#overview').slice(1);const ok=['overview','guests','attendance','gifts','costs','scenarios','model'].includes(h)?h:'overview';
+function route(){const h=(location.hash||'#overview').slice(1);const ok=['overview','guests','std','attendance','gifts','costs','scenarios','model'].includes(h)?h:'overview';
   document.body.dataset.tab=ok;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='t-'+ok));document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+ok));
   if(R) renderVisible(); }
